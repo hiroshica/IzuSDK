@@ -48,13 +48,14 @@ LSTS_LIB := $(SRC_LIB_C:.c=.lst)
 LSTS_LIB := $(addprefix $(OUT_DIR)/, $(LSTS_LIB))
 
 INCS_LIB := -I$(INC_LIB) -I$(OUT_DIR)
-DEFAULT_FLAGS_LIB := $(EXTRA_FLAGS) -DSGDK_GCC -m68000 -Wall -Wextra -Wno-array-bounds -Wno-shift-negative-value -Wno-unused-parameter -fno-builtin -fms-extensions -ffunction-sections -fdata-sections $(INCS_LIB) -B$(BIN)
+DEFAULT_FLAGS_LIB := $(EXTRA_FLAGS) -DSGDK_GCC -m68000 -Wall -Wextra -Wno-array-bounds -Wno-shift-negative-value -Wno-unused-parameter -fno-builtin -fms-extensions -ffunction-sections -fdata-sections $(INCS_LIB) -B$(BIN) $(DIAG_FLAGS)
 FLAGSZ80_LIB := -i$(SRC_LIB) -i$(INC_LIB) -i$(INC_LIB)/snd -i$(OUT_DIR)
 
 ifeq ($(BUILD_TYPE),debug)
 	# debug
-	FLAGS_LIB := $(DEFAULT_FLAGS_LIB) -O1 -DDEBUG=1
-	CFLAGS_LIB := $(FLAGS_LIB) -ggdb
+	# the SGDK folder is written as $(DEBUG_PREFIX_SGDK) in the debug info (see common.mk)
+	FLAGS_LIB := $(DEFAULT_FLAGS_LIB) $(DEBUG_OPT) -DDEBUG=1 $(DEBUG_INFO_FLAGS) $(call debug_prefix_map,$(call native_path,.),$(DEBUG_PREFIX_SGDK))
+	CFLAGS_LIB := $(FLAGS_LIB)
 	AFLAGS_LIB := -x assembler-with-cpp -Wa,--register-prefix-optional,--bitwise-or $(FLAGS_LIB)
 else ifeq ($(BUILD_TYPE),asm)
 	# asm
@@ -113,6 +114,8 @@ $(LIB)/libmd.a: $(OUT_DIR)/libmd.a
 
 $(LIB)/libmd_debug.a: $(OUT_DIR)/libmd.a
 	$(CP) $(OUT_DIR)/libmd.a $(LIB)/libmd_debug.a
+	@$(RM) -f $(LIB)/libmd_debug.*.cfg
+	@$(ECHO) "$(DEBUG_INFO_FLAGS) $(DEBUG_OPT) $(DEBUG_PREFIX_SGDK)" > $(LIB)/libmd_debug.$(DEBUG_CFG).cfg
 
 $(OUT_DIR)/libmd.a: $(OUT_DIR)/cmd_
 	$(AR) rs $(OUT_DIR)/libmd.a $(LTO_PLUGIN) @$(OUT_DIR)/cmd_
@@ -120,6 +123,17 @@ $(OUT_DIR)/libmd.a: $(OUT_DIR)/cmd_
 
 $(OUT_DIR)/cmd_: $(OBJS_LIB)
 	$(ECHO) "$(OBJS_LIB)" > $(OUT_DIR)/cmd_
+
+# debug: the objects depend on a marker named after the settings (DWARF_VERSION, DEBUG_OPT),
+# so changing them rebuilds everything instead of mixing objects made with other settings
+ifeq ($(BUILD_TYPE),debug)
+DEBUG_STAMP := $(OUT_DIR)/.$(DEBUG_CFG).cfg
+$(OBJS_LIB): $(DEBUG_STAMP)
+$(DEBUG_STAMP):
+	@$(MKDIR) -p $(OUT_DIR)
+	@$(RM) -f $(OUT_DIR)/.*.cfg
+	@$(ECHO) "$(DEBUG_INFO_FLAGS) $(DEBUG_OPT) $(DEBUG_PREFIX_SGDK)" > $@
+endif
 
 
 # source compilation

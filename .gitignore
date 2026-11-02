@@ -49,3 +49,5 @@ tools/.project
 tools/build/
 wip.txt
 .github/copilot-instructions.md
+backup-before-debug-patch/
+sample/dbgsample/

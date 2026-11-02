@@ -95,26 +95,45 @@ DEPS := $(addprefix $(DEP_DIR)/, $(DEPS))
 
 INCS := -I. -I$(INC_DIR) -I$(RES_DIR) -I$(OUT_DIR) -isystem$(INC_LIB) -isystem$(OUT_DIR_LIB)
 DEFAULT_FLAGS := $(EXTRA_FLAGS) -DSGDK_GCC -m68000 -fdiagnostics-color=always -Wall -Wextra -Wno-shift-negative-value -Wno-main -Wno-unused-parameter -fno-builtin -ffunction-sections -fdata-sections -fms-extensions -B$(BIN)
+ifneq ($(DIAG_FORMAT),)
+	# machine readable messages (see common.mk): no colors
+	DEFAULT_FLAGS := $(filter-out -fdiagnostics-color=always,$(DEFAULT_FLAGS)) $(DIAG_FLAGS)
+endif
 Z80_FLAGS := -i. -i$(SRC_DIR) -i$(INC_DIR) -i$(RES_DIR) -i$(OUT_DIR) -i$(SRC_LIB) -i$(INC_LIB) -i$(INC_LIB)/snd -i$(OUT_DIR_LIB)
 
 ifeq ($(BUILD_TYPE),debug)
 	# debug
-	FLAGS := $(INCS) $(DEFAULT_FLAGS) -O1 -DDEBUG=1
-	CFLAGS := $(FLAGS) -ggdb -g
+	# DWARF version, optimization and paths in the debug info: see common.mk
+	# (the SGDK folder becomes $(DEBUG_PREFIX_SGDK), the project folder '.', the project map last so it wins
+	# for a project inside the SGDK folder)
+	DEBUG_PREFIX_FLAGS := $(foreach d,$(sort $(GDK) $(call native_path,$(GDK))),$(call debug_prefix_map,$(d),$(DEBUG_PREFIX_SGDK))) $(call debug_prefix_map,$(call native_path,.),.)
+	FLAGS := $(INCS) $(DEFAULT_FLAGS) $(DEBUG_OPT) -DDEBUG=1 $(DEBUG_INFO_FLAGS) $(DEBUG_PREFIX_FLAGS)
+	CFLAGS := $(FLAGS)
 	AFLAGS := -x assembler-with-cpp -Wa,--register-prefix-optional,--bitwise-or $(FLAGS)
 	LIBMD := $(LIB)/libmd_debug.a
+	# no LTO in debug builds (it would drop and rewrite the debug info at link time)
+	LINK_LTO :=
 else ifeq ($(BUILD_TYPE),asm)
 	# asm
 	FLAGS := $(INCS) $(DEFAULT_FLAGS) -O3 -fuse-linker-plugin -fno-web -fno-gcse -fno-tree-loop-ivcanon -fomit-frame-pointer
 	CFLAGS := $(FLAGS)
 	AFLAGS := -x assembler-with-cpp -Wa,--register-prefix-optional,--bitwise-or $(FLAGS)
 	LIBMD := $(LIB)/libmd.a
+	LINK_LTO := -flto -flto=auto -ffat-lto-objects
 else
 	# release
 	FLAGS := $(INCS) $(DEFAULT_FLAGS) -O3 -fuse-linker-plugin -fno-web -fno-gcse -fno-tree-loop-ivcanon -fomit-frame-pointer -flto -flto=auto -ffat-lto-objects
 	CFLAGS := $(FLAGS)
 	AFLAGS := -x assembler-with-cpp -Wa,--register-prefix-optional,--bitwise-or $(FLAGS)
 	LIBMD := $(LIB)/libmd.a
+	LINK_LTO := -flto -flto=auto -ffat-lto-objects
+endif
+
+# debug: the library should be built with the same DWARF_VERSION and DEBUG_OPT (makelib.gen leaves a marker)
+ifeq ($(BUILD_TYPE)$(CLEAN),debugFALSE)
+ifeq ($(wildcard $(LIB)/libmd_debug.$(DEBUG_CFG).cfg),)
+$(warning $(LIBMD) was not built with DWARF_VERSION=$(DWARF_VERSION) DEBUG_OPT=$(DEBUG_OPT): rebuild it in the SGDK folder with 'make -f makelib.gen debug DWARF_VERSION=$(DWARF_VERSION) DEBUG_OPT=$(DEBUG_OPT)')
+endif
 endif
 
 
@@ -184,18 +203,28 @@ $(OUT_DIR)/symbol.txt: $(OUT_DIR)/rom.out
 
 $(OUT_DIR)/rom.out: $(OUT_DIR)/sega.o $(OUT_DIR)/cmd_ $(LIBMD)
 	@$(MKDIR) -p $(dir $@)
-	$(CC) -m68000 -B$(BIN) -n -T $(GDK)/md.ld -nostdlib $(OUT_DIR)/sega.o @$(OUT_DIR)/cmd_ $(LIBMD) $(LIBGCC) -o $(OUT_DIR)/rom.out -Wl,--gc-sections -flto -flto=auto -ffat-lto-objects
+	$(CC) -m68000 -B$(BIN) -n -T $(GDK)/md.ld -nostdlib $(OUT_DIR)/sega.o @$(OUT_DIR)/cmd_ $(LIBMD) $(LIBGCC) -o $(OUT_DIR)/rom.out -Wl,--gc-sections $(LINK_LTO)
 	@$(RM) $(OUT_DIR)/cmd_
 
 $(OUT_DIR)/cmd_: $(OBJS)
 	@$(MKDIR) -p $(dir $@)
 	$(ECHO) "$(OBJS)" > $(OUT_DIR)/cmd_
 
+# debug: the objects depend on a marker named after the settings (DWARF_VERSION, DEBUG_OPT),
+# so changing them rebuilds everything instead of mixing objects made with other settings
+ifeq ($(BUILD_TYPE),debug)
+DEBUG_STAMP := $(OUT_DIR)/.$(DEBUG_CFG).cfg
+$(OBJS) $(OUT_DIR)/sega.o: $(DEBUG_STAMP)
+$(DEBUG_STAMP):
+	@$(MKDIR) -p $(OUT_DIR)
+	@$(RM) -f $(OUT_DIR)/.*.cfg
+	@$(ECHO) "$(DEBUG_INFO_FLAGS) $(DEBUG_OPT) $(DEBUG_PREFIX_SGDK)" > $@
+endif
+
 # NOTE: sega.s references out/rom_header.bin internally
 $(OUT_DIR)/sega.o: out/rom_header.bin
 	@$(MKDIR) -p $(dir $@)
-	$(CP) $(SRC_LIB)/boot/sega.s $(OUT_DIR)/sega.s
-	$(CC) $(AFLAGS) -c $(OUT_DIR)/sega.s -o $@
+	$(CC) $(AFLAGS) -c $(SRC_LIB)/boot/sega.s -o $@
 
 # NOTE: rom_head.bin need to be located in 'out' folder as it's referenced by boot/sega.s
 out/rom_header.bin: $(OUT_DIR)/rom_header.o
