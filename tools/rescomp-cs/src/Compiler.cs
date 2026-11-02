@@ -25,22 +25,23 @@ public static class Compiler
         new TilesetProcessor(),
         new TilemapProcessor(),
         new SpriteProcessor(),
+        new MapProcessor(),
     };
 
     /// <summary>Java 版にあって、まだ C# に移していない種類。</summary>
-    static readonly string[] notYetPorted = { "MAP", "OBJECTS", "WAV", "XGM", "XGM2" };
+    static readonly string[] notYetPorted = { "OBJECTS", "WAV", "XGM", "XGM2" };
 
     /// <summary>
     /// 種類ごとにまとめて出力する (圧縮が効くように) リソースの型。並びが出力の順番になる。
     /// Java 版の Tilemap・Tileset・Bitmap・Map の順。移したものから足していく。
     /// </summary>
-    public static readonly List<Type> GroupedBinOwnerTypes = new() { typeof(Tilemap), typeof(Tileset), typeof(Bitmap) };
+    public static readonly List<Type> GroupedBinOwnerTypes = new() { typeof(Tilemap), typeof(Tileset), typeof(Bitmap), typeof(Map) };
 
     /// <summary>BIN より前に、圧縮できるメタデータとして出力する型 (Java 版の VDPSprite・Collision)。</summary>
     public static readonly List<Type> EarlyMetadataTypes = new() { typeof(VDPSprite), typeof(Collision) };
 
     /// <summary>まとめ方が特別な型 (Java 版の Map) のために、BIN の集め方を差し替える。</summary>
-    public static readonly Dictionary<Type, Func<List<Resource>, bool, IEnumerable<Bin>>> CustomBinCollectors = new();
+    public static readonly Dictionary<Type, Func<List<Resource>, bool, IEnumerable<Bin>>> CustomBinCollectors = new() { [typeof(Map)] = Map.CollectBins };
 
     /// <summary>集計で「スプライトのメタデータ」として数える型。</summary>
     public static readonly List<Type> SpriteMetadataTypes = new() { typeof(Sprite), typeof(SpriteFrame), typeof(SpriteAnimation) };
