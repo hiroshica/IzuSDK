@@ -96,6 +96,12 @@ public sealed class Tile : IComparable<Tile>
     public static byte[] GetImageTile(byte[] image8bpp, int imgW, int imgH, int x, int y, int size) =>
         GetImageTile(image8bpp, imgW, imgH, x, y, size, new byte[size * size]);
 
+    public static byte[] GetImageTile(byte[] image8bpp, int imgW, int imgH, int tileInd, int size, byte[] dest)
+    {
+        int wt = imgW / size;
+        return GetImageTile(image8bpp, imgW, imgH, (tileInd % wt) * size, (tileInd / wt) * size, size, dest);
+    }
+
     public static byte[] GetImageTile(byte[] image8bpp, int imgW, int imgH, int tileInd, int size)
     {
         int wt = imgW / size;

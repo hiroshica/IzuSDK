@@ -19,10 +19,11 @@ dotnet surugacc/out/rescomp/rescomp.dll <input.res> [output.s] [-noasm] [-nohead
 |---|---|
 | ALIGN / UNGROUP / NEAR | 済み |
 | BIN（NONE / APLIB / LZ4W / FAST / AUTO） | 済み |
-| PALETTE（PNG / BMP / PAL） | 済み（TSX はまだ） |
-| BITMAP / TILESET / TILEMAP / IMAGE | 済み（TSX / TMX はまだ） |
+| PALETTE（PNG / BMP / PAL / TSX） | 済み |
+| BITMAP / TILESET / TILEMAP / IMAGE | 済み（TSX / TMX も） |
 | SPRITE | 済み（SLOW / MAX の最適化は 1 スレッドで回すので jar より遅い） |
-| MAP / OBJECTS | これから |
+| MAP | 済み（画像と TMX の両方） |
+| OBJECTS | 済み（オブジェクト間の参照の解決も） |
 | WAV / XGM / XGM2 | これから |
 
 まだ移植していない種類が `.res` にあると、C# 版は終了コード 3 で終わります。

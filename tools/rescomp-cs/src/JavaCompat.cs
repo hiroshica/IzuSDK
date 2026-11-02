@@ -53,6 +53,17 @@ public static class JavaCompat
         return true;
     }
 
+    /// <summary>Double.parseDouble に近い読み方 (前後の空白は無視、末尾の d / f も許す)。</summary>
+    public static bool TryParseDouble(string s, out double value)
+    {
+        value = 0;
+        if (s == null) return false;
+        s = s.Trim();
+        if (s.Length > 1 && "dDfF".IndexOf(s[^1]) >= 0) s = s[..^1];
+        if (s.Length == 0) return false;
+        return double.TryParse(s, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out value);
+    }
+
     /// <summary>StringUtil.parseBoolean: "true" / "false" (大文字小文字を区別しない) 以外は def。</summary>
     public static bool ParseBoolean(string s, bool def)
     {
