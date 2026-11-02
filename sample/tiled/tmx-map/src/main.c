@@ -51,7 +51,7 @@ Map *fgMap;
 Map *bgMap;
 
 // Forward declarations
-_Noreturn void MainLoop();
+void MainLoop();
 void GameInit();
 void CameraUpdate();
 void InputUpdate();
@@ -112,7 +112,7 @@ void GameInit()
     SYS_doVBlankProcess();
 }
 
-_Noreturn void MainLoop()
+void MainLoop()
 {
     while (TRUE)
     {
