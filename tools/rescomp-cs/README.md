@@ -26,7 +26,7 @@ dotnet surugacc/out/rescomp/rescomp.dll <input.res> [output.s] [-noasm] [-nohead
 | OBJECTS | 済み（オブジェクト間の参照の解決も） |
 | WAV | 済み（PCM の WAV。Java Sound の変換・再サンプリングを同じ結果になるように移した。float などの WAV は jar に任せる） |
 | XGM | 済み（Java 版と同じく SGDK の bin にある xgmtool を呼ぶ） |
-| XGM2 | 済み（Java 版と同じく `java -jar bin/xgm2tool.jar` を呼ぶので、XGM2 だけは java が要る） |
+| XGM2 | 済み（`tools/xgm2tool-cs` の C# 版 xgm2tool を呼ぶ。環境変数 `SGDK_XGM2TOOL` にその dll を指すと使い、なければ・対応していない指定のときは `java -jar bin/xgm2tool.jar`） |
 
 C# 版がまだ扱えないもの（PCM 以外の WAV など）が `.res` にあると、終了コード 3 で終わります。
 `build.ps1` はそのとき rescomp.jar で作り直します。
