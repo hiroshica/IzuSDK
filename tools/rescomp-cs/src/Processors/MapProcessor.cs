@@ -46,7 +46,17 @@ public sealed class MapProcessor : IProcessor
         Compiler.AddResourceFile(fileIn);
 
         if (JavaCompat.GetFileExtension(fileIn, false).ToLowerInvariant() == "tmx")
-            throw new NotPortedException("MAP (TMX)");
+        {
+            string layerName = fields[3];
+            var tsComp = fields.Length >= 5 ? Util.GetCompression(fields[4]) : Compression.NONE;
+            var mapComp = fields.Length >= 6 ? Util.GetCompression(fields[5]) : Compression.NONE;
+            int tmxMapBase = fields.Length >= 7 ? JavaCompat.ParseInt(fields[6], 0) : 0;
+            var order = fields.Length >= 8 ? Util.GetTileOrdering(fields[7]) : TileOrdering.ROW;
+
+            var tmxMap = new Types.TMXMap(fileIn, layerName);
+            return new Map(id, tmxMap.GetMapImage(), tmxMap.W * tmxMap.TileSize, tmxMap.H * tmxMap.TileSize, tmxMapBase, 2,
+                tmxMap.GetTilesets(id, tsComp, false, order), mapComp, true);
+        }
 
         var tileset = Compiler.GetResourceById(fields[3]) as Tileset
             ?? throw new ArgumentException("MAP resource definition error: Tileset '" + fields[3] + "' not found !");

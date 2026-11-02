@@ -109,10 +109,7 @@ public sealed class TilesetProcessor : IProcessor
 
         Compiler.AddResourceFile(fileIn);
 
-        if (tsx)
-            throw new NotPortedException("TSX file is not supported yet by the C# rescomp: '" + fileIn + "'");
-
-        return Tileset.GetTileset(id, fileIn, compression, opt, false, false, order, export);
+        return Tileset.GetTileset(id, tsx ? Types.Tiled.GetTSXTilesetPath(fileIn) : fileIn, compression, opt, tsx, false, order, export);
     }
 }
 
@@ -166,7 +163,18 @@ public sealed class TilemapProcessor : IProcessor
         Compiler.AddResourceFile(fileIn);
 
         if (JavaCompat.GetFileExtension(fileIn, false).ToLowerInvariant() == "tmx")
-            throw new NotPortedException("TMX file is not supported yet by the C# rescomp: '" + fileIn + "'");
+        {
+            string layerName = fields[3];
+            var tsComp = fields.Length >= 5 ? Util.GetCompression(fields[4]) : Compression.NONE;
+            var mapComp = fields.Length >= 6 ? Util.GetCompression(fields[5]) : Compression.NONE;
+            int tmxMapBase = fields.Length >= 7 ? JavaCompat.ParseInt(fields[6], 0) : 0;
+            var tmxOrder = fields.Length >= 8 ? Util.GetTileOrdering(fields[7]) : TileOrdering.ROW;
+
+            var tmxMap = new Types.TMXMap(fileIn, layerName);
+            var tilesets = tmxMap.GetTilesets(id, tsComp, false, tmxOrder);
+            return Tilemap.GetTilemap(id, new Tileset(tilesets), tmxMapBase, tmxMap.GetMapImage(), (tmxMap.W * tmxMap.TileSize) / 8,
+                (tmxMap.H * tmxMap.TileSize) / 8, TileOptimization.ALL, mapComp, tmxOrder);
+        }
 
         var compression = fields.Length >= 5 ? Util.GetCompression(fields[4]) : Compression.NONE;
         var tileOpt = fields.Length >= 6 ? Util.GetTileOpt(fields[5]) : TileOptimization.ALL;

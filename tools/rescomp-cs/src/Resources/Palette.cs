@@ -19,7 +19,7 @@ public sealed class Palette : Resource
         else
         {
             if (JavaCompat.GetFileExtension(file, false).Equals("tsx", StringComparison.OrdinalIgnoreCase))
-                throw new NotPortedException("TSX file is not supported yet by the C# rescomp: '" + file + "'");
+                file = Types.Tiled.GetTSXTilesetPath(file);
 
             var info = ImageUtil.GetBasicInfo(file);
             if (info.Bpp > 8)
