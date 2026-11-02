@@ -24,10 +24,15 @@ dotnet surugacc/out/rescomp/rescomp.dll <input.res> [output.s] [-noasm] [-nohead
 | SPRITE | 済み（SLOW / MAX の最適化は 1 スレッドで回すので jar より遅い） |
 | MAP | 済み（画像と TMX の両方） |
 | OBJECTS | 済み（オブジェクト間の参照の解決も） |
-| WAV / XGM / XGM2 | これから |
+| WAV | 済み（PCM の WAV。Java Sound の変換・再サンプリングを同じ結果になるように移した。float などの WAV は jar に任せる） |
+| XGM | 済み（Java 版と同じく SGDK の bin にある xgmtool を呼ぶ） |
+| XGM2 | 済み（Java 版と同じく `java -jar bin/xgm2tool.jar` を呼ぶので、XGM2 だけは java が要る） |
 
-まだ移植していない種類が `.res` にあると、C# 版は終了コード 3 で終わります。
+C# 版がまだ扱えないもの（PCM 以外の WAV など）が `.res` にあると、終了コード 3 で終わります。
 `build.ps1` はそのとき rescomp.jar で作り直します。
+
+xgmtool / xgm2tool.jar は環境変数 `SGDK_BIN` のフォルダから探します（なければ `GDK` / `SGDK` の下の `bin`）。
+`build.ps1` と `compare.ps1` は自分で `SGDK_BIN` を設定します。
 
 ## rescomp.jar と比べる
 

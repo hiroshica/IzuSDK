@@ -27,10 +27,13 @@ public static class Compiler
         new SpriteProcessor(),
         new MapProcessor(),
         new ObjectsProcessor(),
+        new WavProcessor(),
+        new XgmProcessor(),
+        new Xgm2Processor(),
     };
 
     /// <summary>Java 版にあって、まだ C# に移していない種類。</summary>
-    static readonly string[] notYetPorted = { "WAV", "XGM", "XGM2" };
+    static readonly string[] notYetPorted = { };
 
     /// <summary>
     /// 種類ごとにまとめて出力する (圧縮が効くように) リソースの型。並びが出力の順番になる。

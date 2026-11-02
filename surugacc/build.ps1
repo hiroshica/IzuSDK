@@ -157,6 +157,8 @@ function Get-RescompCs {
 function Invoke-Rescomp {
     $dll = Get-RescompCs
     if ($dll) {
+        # xgmtool / xgm2tool.jar は SGDK の bin にある (Java 版は rescomp.jar の隣を見る)
+        $env:SGDK_BIN = "$gdk/bin"
         & dotnet $dll @args
         if ($LASTEXITCODE -eq 0) { return }
         if ($LASTEXITCODE -ne 3) { throw "build.ps1: rescomp (C#) $($args -join ' ') が失敗しました (終了コード $LASTEXITCODE)" }
