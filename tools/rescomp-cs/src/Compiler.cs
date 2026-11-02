@@ -24,10 +24,11 @@ public static class Compiler
         new ImageProcessor(),
         new TilesetProcessor(),
         new TilemapProcessor(),
+        new SpriteProcessor(),
     };
 
     /// <summary>Java 版にあって、まだ C# に移していない種類。</summary>
-    static readonly string[] notYetPorted = { "MAP", "OBJECTS", "SPRITE", "WAV", "XGM", "XGM2" };
+    static readonly string[] notYetPorted = { "MAP", "OBJECTS", "WAV", "XGM", "XGM2" };
 
     /// <summary>
     /// 種類ごとにまとめて出力する (圧縮が効くように) リソースの型。並びが出力の順番になる。
@@ -36,13 +37,13 @@ public static class Compiler
     public static readonly List<Type> GroupedBinOwnerTypes = new() { typeof(Tilemap), typeof(Tileset), typeof(Bitmap) };
 
     /// <summary>BIN より前に、圧縮できるメタデータとして出力する型 (Java 版の VDPSprite・Collision)。</summary>
-    public static readonly List<Type> EarlyMetadataTypes = new();
+    public static readonly List<Type> EarlyMetadataTypes = new() { typeof(VDPSprite), typeof(Collision) };
 
     /// <summary>まとめ方が特別な型 (Java 版の Map) のために、BIN の集め方を差し替える。</summary>
     public static readonly Dictionary<Type, Func<List<Resource>, bool, IEnumerable<Bin>>> CustomBinCollectors = new();
 
     /// <summary>集計で「スプライトのメタデータ」として数える型。</summary>
-    public static readonly List<Type> SpriteMetadataTypes = new();
+    public static readonly List<Type> SpriteMetadataTypes = new() { typeof(Sprite), typeof(SpriteFrame), typeof(SpriteAnimation) };
 
     /// <summary>行を読み終えたあとに呼ぶもの (Java 版の TMX のオブジェクト参照の解決など)。</summary>
     public static readonly List<Action<List<Resource>>> PostProcessors = new();

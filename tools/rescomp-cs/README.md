@@ -21,7 +21,7 @@ dotnet surugacc/out/rescomp/rescomp.dll <input.res> [output.s] [-noasm] [-nohead
 | BIN（NONE / APLIB / LZ4W / FAST / AUTO） | 済み |
 | PALETTE（PNG / BMP / PAL） | 済み（TSX はまだ） |
 | BITMAP / TILESET / TILEMAP / IMAGE | 済み（TSX / TMX はまだ） |
-| SPRITE | これから |
+| SPRITE | 済み（SLOW / MAX の最適化は 1 スレッドで回すので jar より遅い） |
 | MAP / OBJECTS | これから |
 | WAV / XGM / XGM2 | これから |
 
