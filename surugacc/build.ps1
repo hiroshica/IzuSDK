@@ -101,6 +101,11 @@ Set-SurugaCC
 
 if (-not $Sgdk) { $Sgdk = Split-Path -Parent $PSScriptRoot }
 $gdk = (Resolve-Path $Sgdk).Path
+# SurugaCC の setup.bat で設定した GDK (SGDK の場所) が、このリポジトリと違うときは知らせる (使うのはこのリポジトリ)
+$gdkEnv = if ($env:GDK) { $env:GDK } else { $env:SGDK }
+if ($gdkEnv -and (Test-Path -LiteralPath $gdkEnv) -and (Resolve-Path -LiteralPath $gdkEnv).Path.TrimEnd('\', '/') -ne $gdk.TrimEnd('\', '/')) {
+    Write-Warning "環境変数 GDK ($gdkEnv) はこのリポジトリ ($gdk) と違います。ここでは $gdk を使います (setup.bat <このリポジトリ> で GDK を合わせられます)"
+}
 $proj = (Resolve-Path $Project).Path
 $debug = @(if ($g) { '-g' })
 $lib = if ($SgdkLib) { $SgdkLib } else { Join-Path $PSScriptRoot "out/lib$(if ($g) { '-debug' })$(if ($Opt -gt 0) { "-O$Opt" })" }

@@ -11,6 +11,15 @@
 - Java (今は rescomp.jar を使うため。C# 版に置き換えたら要らなくなる。sizebnd.jar はもう使わない)
 - sjasm (Windows では `bin/sjasm.exe` をそのまま使う)
 
+## 始め方 (SurugaCC の setup.bat から)
+
+```
+C:\Users\hiro_\working\tools\SurugaCC\setup.bat <このリポジトリのフォルダ>
+```
+
+setup.bat が PATH・`SURUGACC`・`GDK` を設定するので、そのウィンドウで下の使い方のとおりにビルドできます
+(`/persist` を付ければ次からのウィンドウでも)。
+
 ## 使い方
 
 ```
