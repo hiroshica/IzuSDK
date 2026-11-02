@@ -23,10 +23,13 @@ public static class JavaCompat
     }
 
     /// <summary>StringUtil.parseInt: Integer.parseInt と同じ書式 (10 進、符号付き) で読めなければ def。</summary>
-    public static int ParseInt(string s, int def)
+    public static int ParseInt(string s, int def) => TryParseInt(s, out int v) ? v : def;
+
+    static bool TryParseInt(string s, out int value)
     {
+        value = 0;
         if (s == null || s.Length == 0)
-            return def;
+            return false;
         int i = 0;
         bool neg = false;
         if (s[0] == '-' || s[0] == '+')
@@ -34,19 +37,20 @@ public static class JavaCompat
             neg = s[0] == '-';
             i = 1;
             if (s.Length == 1)
-                return def;
+                return false;
         }
         long v = 0;
         for (; i < s.Length; i++)
         {
             int d = s[i] - '0';
             if (d < 0 || d > 9)
-                return def;
+                return false;
             v = v * 10 + d;
             if (v > (neg ? 2147483648L : int.MaxValue))
-                return def;
+                return false;
         }
-        return (int)(neg ? -v : v);
+        value = (int)(neg ? -v : v);
+        return true;
     }
 
     /// <summary>StringUtil.parseBoolean: "true" / "false" (大文字小文字を区別しない) 以外は def。</summary>
@@ -92,18 +96,120 @@ public static class JavaCompat
     /// java.util.HashSet&lt;String&gt; を回したときの順番に並べる (中身は重複のない、加えた順の列)。
     /// 表の大きさは 16 から始まり、要素数が 0.75 倍を超えると倍になる。同じ場所に入るものは加えた順のまま。
     /// </summary>
-    public static List<string> JavaHashSetOrder(IReadOnlyList<string> items)
-    {
-        int cap = 16;
-        while (items.Count > cap * 3 / 4)
-            cap *= 2;
-        return items
-            .Select((s, i) => (s, i, b: Spread(HashCode(s)) & (cap - 1)))
-            .OrderBy(t => t.b).ThenBy(t => t.i)
-            .Select(t => t.s)
-            .ToList();
+    public static List<string> JavaHashSetOrder(IReadOnlyList<string> items) =>
+        JavaHashSetOrder(items, HashCode, (a, b) => a == b);
 
-        static int Spread(int h) => h ^ (int)((uint)h >> 16);
+    /// <summary>
+    /// Java の HashSet に items を順に add したときの、取り出しの順番 (重複は除く)。
+    /// 入れ物の数は 16 から始まり、要素の数が 3/4 を超えるか、入れ物が 64 未満で 1 つに 9 個以上入ると倍になる。
+    /// 同じ入れ物の中は入れた順 (木構造になる場合はまねていない)。
+    /// </summary>
+    public static List<T> JavaHashSetOrder<T>(IReadOnlyList<T> items, Func<T, int> hash, Func<T, T, bool> equal)
+    {
+        var kept = new List<(T Item, int Hash)>();
+        int cap = 16;
+        foreach (var item in items)
+        {
+            int h = Spread(hash(item));
+            if (kept.Any(k => k.Hash == h && equal(k.Item, item)))
+                continue;
+            int chain = kept.Count(k => (k.Hash & (cap - 1)) == (h & (cap - 1)));
+            kept.Add((item, h));
+            if (chain >= 8 && cap < 64)
+                cap *= 2;
+            if (kept.Count > cap * 3 / 4)
+                cap *= 2;
+        }
+        return kept
+            .Select((k, i) => (k.Item, i, b: k.Hash & (cap - 1)))
+            .OrderBy(t => t.b).ThenBy(t => t.i)
+            .Select(t => t.Item)
+            .ToList();
+    }
+
+    static int Spread(int h) => h ^ (int)((uint)h >> 16);
+
+    /// <summary>java.util.List.hashCode と同じ。</summary>
+    public static int ListHashCode<T>(IEnumerable<T> list)
+    {
+        int h = 1;
+        foreach (var e in list)
+            h = unchecked(31 * h + (e == null ? 0 : e.GetHashCode()));
+        return h;
+    }
+
+    /// <summary>Integer.parseInt と同じ (数字でなければ FormatException)。</summary>
+    public static int ParseIntStrict(string s) =>
+        TryParseInt(s, out int v) ? v : throw new FormatException("For input string: \"" + s + "\"");
+
+    /// <summary>StringUtil.isTaggedNumber: "125P" のように数字のあとに tag が続く。</summary>
+    public static bool IsTaggedNumber(string s, string tag) =>
+        !string.IsNullOrEmpty(s?.Trim()) && !string.IsNullOrEmpty(tag?.Trim()) &&
+        System.Text.RegularExpressions.Regex.IsMatch(s, "^[0-9]+" + System.Text.RegularExpressions.Regex.Escape(tag) + "$");
+
+    public static int ParseTaggedInt(string s, string tag, int def) =>
+        IsTaggedNumber(s, tag) ? ParseIntStrict(s.Substring(0, s.Length - tag.Length)) : def;
+
+    /// <summary>StringUtil.parseIntArray: "[1,2,3]" か "5"。読めなければ def。</summary>
+    public static int[] ParseIntArray(string s, int[] def)
+    {
+        if (s == null)
+            return def;
+        try
+        {
+            if (s[0] == '[')
+            {
+                var parts = SplitJava(s.Substring(1, s.Length - 2), ",");
+                return parts.Select(p => ParseIntStrict(Trim(p))).ToArray();
+            }
+            return new[] { ParseIntStrict(Trim(s)) };
+        }
+        catch (FormatException)
+        {
+            return def;
+        }
+    }
+
+    /// <summary>StringUtil.parseIntArray2D: "[[1,2],[3]]" か "5"。読めなければ def。</summary>
+    public static int[][] ParseIntArray2D(string s, int[][] def)
+    {
+        if (s == null)
+            return def;
+        try
+        {
+            if (s[0] == '[')
+            {
+                var ss = s.Substring(1, s.Length - 2).Replace("[", "");
+                var arrayStr = SplitJava(ss, "]");
+                var result = new int[arrayStr.Length][];
+                for (int i = 0; i < arrayStr.Length; i++)
+                {
+                    var array1d = Trim(arrayStr[i]);
+                    if (array1d.Length == 0)
+                        throw new ArgumentOutOfRangeException(nameof(s), "String index out of range: 0");
+                    if (array1d[0] == ',')
+                        array1d = array1d.Substring(1);
+                    result[i] = ParseIntArray("[" + array1d + "]", def.Length > i ? def[i] : new[] { 0 });
+                }
+                return result;
+            }
+            return new[] { new[] { ParseIntStrict(s) } };
+        }
+        catch (FormatException)
+        {
+            return def;
+        }
+    }
+
+    /// <summary>String.split(固定の文字列) と同じ (末尾の空の要素は捨てる)。</summary>
+    public static string[] SplitJava(string s, string sep)
+    {
+        var parts = s.Split(sep).ToList();
+        while (parts.Count > 1 && parts[^1].Length == 0)
+            parts.RemoveAt(parts.Count - 1);
+        if (parts.Count == 1 && parts[0].Length == 0 && s.Length > 0)
+            parts.Clear();
+        return parts.ToArray();
     }
 
     // ---- FileUtil

@@ -59,6 +59,29 @@ public static class Util
         throw new ArgumentException("Unrecognized tilemap optimization: '" + text + "'");
     }
 
+    public static Types.OptimizationType GetSpriteOptType(string text)
+    {
+        var up = text.ToUpperInvariant();
+        if (string.IsNullOrWhiteSpace(up) || up == "BALANCED" || up == "0") return Types.OptimizationType.BALANCED;
+        if (up == "SPRITE" || up == "1") return Types.OptimizationType.MIN_SPRITE;
+        if (up == "TILE" || up == "2") return Types.OptimizationType.MIN_TILE;
+        if (up == "NONE" || up == "3") return Types.OptimizationType.NONE;
+        throw new ArgumentException("Unrecognized sprite optimization type: '" + text + "'");
+    }
+
+    public static Types.OptimizationLevel GetSpriteOptLevel(string text)
+    {
+        var up = text.ToUpperInvariant();
+        int value = JavaCompat.ParseInt(up, -1);
+        if (string.IsNullOrWhiteSpace(up) || up == "FAST" || value == 0) return Types.OptimizationLevel.FAST;
+        if (up == "MEDIUM" || value == 1) return Types.OptimizationLevel.MEDIUM;
+        // 以前の、くり返しの回数で指定する書き方
+        if (up == "MAX" || value > 200000) return Types.OptimizationLevel.MAX;
+        if (up == "SLOW" || value >= 10000) return Types.OptimizationLevel.SLOW;
+        if (value != -1) return Types.OptimizationLevel.FAST;
+        throw new ArgumentException("Unrecognized sprite optimization level: '" + text + "'");
+    }
+
     public static TileOrdering GetTileOrdering(string text)
     {
         var up = text.ToUpperInvariant();

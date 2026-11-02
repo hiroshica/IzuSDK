@@ -410,22 +410,6 @@ public static class ImageUtil
     /// <summary>8bpp のインデックスカラー PNG を書く (パレットは 0xAARRGGBB)。</summary>
     public static void SaveIndexedPng(string path, int w, int h, int[] paletteARGB, byte[] pixels)
     {
-        using var fs = File.Create(path);
-        fs.Write(new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A });
-
-        void Chunk(string type, byte[] data)
-        {
-            var typeBytes = System.Text.Encoding.ASCII.GetBytes(type);
-            var len = new byte[] { (byte)(data.Length >> 24), (byte)(data.Length >> 16), (byte)(data.Length >> 8), (byte)data.Length };
-            fs.Write(len);
-            fs.Write(typeBytes);
-            fs.Write(data);
-            uint crc = Crc32(data, Crc32(typeBytes, 0xFFFFFFFF, false), true);
-            fs.Write(new byte[] { (byte)(crc >> 24), (byte)(crc >> 16), (byte)(crc >> 8), (byte)crc });
-        }
-
-        Chunk("IHDR", new byte[] { (byte)(w >> 24), (byte)(w >> 16), (byte)(w >> 8), (byte)w, (byte)(h >> 24), (byte)(h >> 16), (byte)(h >> 8), (byte)h, 8, 3, 0, 0, 0 });
-
         var plte = new byte[paletteARGB.Length * 3];
         var trns = new byte[paletteARGB.Length];
         bool hasAlpha = false;
@@ -437,18 +421,37 @@ public static class ImageUtil
             trns[i] = (byte)(paletteARGB[i] >> 24);
             hasAlpha |= trns[i] != 0xFF;
         }
-        Chunk("PLTE", plte);
-        if (hasAlpha)
-            Chunk("tRNS", trns);
+        var raw = new byte[h * (w + 1)];
+        for (int y = 0; y < h; y++)
+            Array.Copy(pixels, y * w, raw, y * (w + 1) + 1, w);
+        WritePng(path, new byte[] { (byte)(w >> 24), (byte)(w >> 16), (byte)(w >> 8), (byte)w, (byte)(h >> 24), (byte)(h >> 16), (byte)(h >> 8), (byte)h, 8, 3, 0, 0, 0 },
+            plte, hasAlpha ? trns : null, raw);
+    }
 
+    static void WritePng(string path, byte[] ihdr, byte[] plte, byte[] trns, byte[] raw)
+    {
+        using var fs = File.Create(path);
+        fs.Write(new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A });
+
+        void Chunk(string type, byte[] data)
+        {
+            var typeBytes = System.Text.Encoding.ASCII.GetBytes(type);
+            fs.Write(new byte[] { (byte)(data.Length >> 24), (byte)(data.Length >> 16), (byte)(data.Length >> 8), (byte)data.Length });
+            fs.Write(typeBytes);
+            fs.Write(data);
+            uint crc = Crc32(data, Crc32(typeBytes, 0xFFFFFFFF, false), true);
+            fs.Write(new byte[] { (byte)(crc >> 24), (byte)(crc >> 16), (byte)(crc >> 8), (byte)crc });
+        }
+
+        Chunk("IHDR", ihdr);
+        if (plte != null)
+            Chunk("PLTE", plte);
+        if (trns != null)
+            Chunk("tRNS", trns);
         using (var ms = new MemoryStream())
         {
             using (var z = new System.IO.Compression.ZLibStream(ms, System.IO.Compression.CompressionLevel.Optimal, true))
-                for (int y = 0; y < h; y++)
-                {
-                    z.WriteByte(0);
-                    z.Write(pixels, y * w, w);
-                }
+                z.Write(raw);
             Chunk("IDAT", ms.ToArray());
         }
         Chunk("IEND", Array.Empty<byte>());
@@ -473,5 +476,166 @@ public static class ImageUtil
         foreach (var b in data)
             crc = crcTable[(crc ^ b) & 0xFF] ^ (crc >> 8);
         return final ? crc ^ 0xFFFFFFFF : crc;
+    }
+
+    // ---- スプライトの分割で使うもの (Java 版と同じく、矩形は画像の範囲で切ってから調べる)
+
+    public static bool IsTransparent(byte[] image8bpp, int imgW, int imgH, Types.JRect region)
+    {
+        var adj = region.Intersection(new Types.JRect(imgW, imgH));
+        int offset = (adj.Y * imgW) + adj.X;
+        for (int y = 0; y < adj.Height; y++)
+        {
+            for (int x = 0; x < adj.Width; x++)
+                if (image8bpp[offset++] != 0)
+                    return false;
+            offset += imgW - adj.Width;
+        }
+        return true;
+    }
+
+    public static int GetOpaquePixelCount(byte[] image8bpp, int imgW, int imgH, Types.JRect region)
+    {
+        var adj = region.Intersection(new Types.JRect(imgW, imgH));
+        int result = 0;
+        int offset = (adj.Y * imgW) + adj.X;
+        for (int y = 0; y < adj.Height; y++)
+        {
+            for (int x = 0; x < adj.Width; x++)
+                if (image8bpp[offset++] != 0)
+                    result++;
+            offset += imgW - adj.Width;
+        }
+        return result;
+    }
+
+    public static bool HasOpaquePixelOnEdge(byte[] image8bpp, int imgW, int imgH, Types.JRect region, bool left, bool top, bool right, bool bottom)
+    {
+        var adj = region.Intersection(new Types.JRect(imgW, imgH));
+        if (left)
+        {
+            int offset = (adj.Y * imgW) + adj.X;
+            for (int i = adj.Y; i < adj.Y + adj.Height; i++)
+            {
+                if (image8bpp[offset] != 0) return true;
+                offset += imgW;
+            }
+        }
+        if (top)
+        {
+            int offset = (adj.Y * imgW) + adj.X;
+            for (int i = adj.X; i < adj.X + adj.Width; i++)
+            {
+                if (image8bpp[offset] != 0) return true;
+                offset++;
+            }
+        }
+        if (right)
+        {
+            int offset = (adj.Y * imgW) + adj.X + (adj.Width - 1);
+            for (int i = adj.Y; i < adj.Y + adj.Height; i++)
+            {
+                if (image8bpp[offset] != 0) return true;
+                offset += imgW;
+            }
+        }
+        if (bottom)
+        {
+            int offset = ((adj.Y + (adj.Height - 1)) * imgW) + adj.X;
+            for (int i = adj.X; i < adj.X + adj.Width; i++)
+            {
+                if (image8bpp[offset] != 0) return true;
+                offset++;
+            }
+        }
+        return false;
+    }
+
+    public static Types.JRect GetOpaqueRect(byte[] image8bpp, int imgW, int imgH, Types.JRect region)
+    {
+        var adj = region.Intersection(new Types.JRect(imgW, imgH));
+        var result = new Types.JRect(0, 0, -1, -1);
+        var pt = new Types.JRect(0, 0, 1, 1);
+        for (int j = adj.Y; j < adj.Y + adj.Height; j++)
+        {
+            int offset = j * imgW;
+            for (int i = adj.X; i < adj.X + adj.Width; i++)
+            {
+                if (image8bpp[offset + i] != 0)
+                {
+                    pt.X = i; pt.Y = j;
+                    result.Add(pt);
+                }
+            }
+        }
+        return result;
+    }
+
+    /// <summary>スプライトが使うパレットの番号 (1 つだけ使える)。</summary>
+    public static int GetSpritePaletteIndex(byte[] image8bpp, int imgW, int imgH)
+    {
+        int pal = -1;
+        int srcOff = 0;
+        for (int y = 0; y < imgH; y++)
+            for (int x = 0; x < imgW; x++)
+            {
+                int pixel = image8bpp[srcOff++];
+                if ((pixel & 0xF) != 0)
+                {
+                    int curPal = (pixel >> 4) & 0xF;
+                    if (pal == -1)
+                        pal = curPal;
+                    else if (pal != curPal)
+                        throw new ArgumentException("Error: pixel at [" + x + "," + y + "] reference a different palette (" + curPal + " != " + pal + ").");
+                }
+            }
+        return pal == -1 ? 0 : pal;
+    }
+
+    /// <summary>
+    /// 画像を 2 倍に拡大し、矩形 (x, y, w, h は拡大後の座標) をピンクで描いて PNG で保存する (スプライトの分割の確認用)。
+    /// </summary>
+    public static void SaveScaledWithRects(string srcFile, string path, IEnumerable<(int X, int Y, int W, int H)> rects)
+    {
+        var img = ImageReader.Load(srcFile);
+        int w = img.Width * 2, h = img.Height * 2;
+        var px = new int[w * h];
+        for (int y = 0; y < h; y++)
+            for (int x = 0; x < w; x++)
+                px[y * w + x] = img.Argb[(y / 2) * img.Width + (x / 2)];
+
+        const int pink = unchecked((int)0xFFFFAFAF);
+        void Plot(int x, int y)
+        {
+            if (x >= 0 && y >= 0 && x < w && y < h)
+                px[y * w + x] = pink;
+        }
+        foreach (var r in rects)
+        {
+            // Graphics2D.drawRect と同じく、右端と下端は x + w、y + h の位置に描く
+            for (int x = r.X; x <= r.X + r.W; x++) { Plot(x, r.Y); Plot(x, r.Y + r.H); }
+            for (int y = r.Y; y <= r.Y + r.H; y++) { Plot(r.X, y); Plot(r.X + r.W, y); }
+        }
+        SaveArgbPng(path, w, h, px);
+    }
+
+    /// <summary>32 ビット (ARGB) の画素を RGBA の PNG で保存する。</summary>
+    public static void SaveArgbPng(string path, int w, int h, int[] argb)
+    {
+        var raw = new byte[h * (1 + w * 4)];
+        int o = 0;
+        for (int y = 0; y < h; y++)
+        {
+            raw[o++] = 0;
+            for (int x = 0; x < w; x++)
+            {
+                int c = argb[y * w + x];
+                raw[o++] = (byte)(c >> 16);
+                raw[o++] = (byte)(c >> 8);
+                raw[o++] = (byte)c;
+                raw[o++] = (byte)(c >> 24);
+            }
+        }
+        WritePng(path, new byte[] { (byte)(w >> 24), (byte)(w >> 16), (byte)(w >> 8), (byte)w, (byte)(h >> 24), (byte)(h >> 16), (byte)(h >> 8), (byte)h, 8, 6, 0, 0, 0 }, null, null, raw);
     }
 }
