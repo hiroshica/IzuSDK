@@ -8,7 +8,7 @@ static class Xml
 {
     public static XmlElement Load(string file)
     {
-        var doc = new XmlDocument { XmlResolver = null };
+        var doc = new XmlDocument { XmlResolver = null, PreserveWhitespace = true };
         using var reader = XmlReader.Create(file, new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore });
         doc.Load(reader);
         return doc.DocumentElement;
@@ -36,8 +36,15 @@ static class Xml
         return child != null ? child.Value : def;
     }
 
-    /// <summary>子ノードのテキストをつないだもの (Java の XMLUtil.getValue)。</summary>
-    public static string Value(XmlElement e, string def) => FirstValue(e, def);
+    /// <summary>子ノードの値をすべてつないだもの (Java の XMLUtil.getValue)。</summary>
+    public static string Value(XmlElement e, string def)
+    {
+        if (e == null) return def;
+        var sb = new System.Text.StringBuilder();
+        for (var c = e.FirstChild; c != null; c = c.NextSibling)
+            sb.Append(c.Value ?? "null");
+        return sb.ToString();
+    }
 }
 
 /// <summary>Tiled のタイルセット (TSX)。Java 版の TSX.TSXTileset。</summary>

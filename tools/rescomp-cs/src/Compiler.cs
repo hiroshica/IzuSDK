@@ -26,10 +26,11 @@ public static class Compiler
         new TilemapProcessor(),
         new SpriteProcessor(),
         new MapProcessor(),
+        new ObjectsProcessor(),
     };
 
     /// <summary>Java 版にあって、まだ C# に移していない種類。</summary>
-    static readonly string[] notYetPorted = { "OBJECTS", "WAV", "XGM", "XGM2" };
+    static readonly string[] notYetPorted = { "WAV", "XGM", "XGM2" };
 
     /// <summary>
     /// 種類ごとにまとめて出力する (圧縮が効くように) リソースの型。並びが出力の順番になる。
@@ -47,7 +48,7 @@ public static class Compiler
     public static readonly List<Type> SpriteMetadataTypes = new() { typeof(Sprite), typeof(SpriteFrame), typeof(SpriteAnimation) };
 
     /// <summary>行を読み終えたあとに呼ぶもの (Java 版の TMX のオブジェクト参照の解決など)。</summary>
-    public static readonly List<Action<List<Resource>>> PostProcessors = new();
+    public static readonly List<Action<List<Resource>>> PostProcessors = new() { Types.TMXObjects.ResolveObjectsReferences };
 
     public static string CurrentDir;
     public static string ResDir;
