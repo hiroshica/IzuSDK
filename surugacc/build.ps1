@@ -7,7 +7,9 @@
     makefile.gen / makelib.gen と同じ手順を gcc の代わりに surugacc で行う。
 
     - SGDK は既定でこのスクリプトの一つ上のフォルダ (このリポジトリ) を使う。
-    - リソースの変換は、今は bin/rescomp.jar を使う (java が必要)。C# 版に置き換えたら、ここを差し替える。
+    - リソースの変換は C# 版の rescomp (tools/rescomp-cs。dotnet があれば surugacc/out/rescomp に自動でビルドする) を使う。
+      まだ C# に移していない種類のリソースがあるときや dotnet がないときは bin/rescomp.jar を使う (java が必要)。
+      環境変数 SGDK_RESCOMP=java で、いつも rescomp.jar を使う。
     - ROM の大きさとチェックサムの調整 (sizebnd.jar と同じ計算) はこのスクリプトの中で行う。
     - Z80 のドライバ (*.s80) は sjasm でアセンブルする (Windows では bin/sjasm.exe、それ以外では PATH の sjasm)。
 
@@ -118,6 +120,51 @@ $CFLAGS = @('--target', 'megadrive', '-m68000', "-O$Opt", '-DSGDK_GCC', '-fno-bu
 if ($g) { $CFLAGS += '-DDEBUG=1' }
 $AFLAGS = @('--target', 'megadrive', '-m68000', '-x', 'assembler-with-cpp', '-Wa,--register-prefix-optional,--bitwise-or', '-DSGDK_GCC') + $debug
 
+# ---- rescomp: C# 版 (tools/rescomp-cs) を使い、まだ C# に移していない種類があれば rescomp.jar で作り直す
+# 環境変数 SGDK_RESCOMP=java で、いつも rescomp.jar を使う
+$script:RescompCsChecked = $false
+$script:RescompCs = $null
+function Get-RescompCs {
+    if ($script:RescompCsChecked) { return $script:RescompCs }
+    $script:RescompCsChecked = $true
+    if ($env:SGDK_RESCOMP -eq 'java') { return $null }
+    $src = Join-Path $gdk 'tools/rescomp-cs/src'
+    if (-not (Test-Path -LiteralPath (Join-Path $src 'RescompCs.csproj'))) { return $null }
+    $outDir = Join-Path $PSScriptRoot 'out/rescomp'
+    $dll = Join-Path $outDir 'rescomp.dll'
+    $stale = -not (Test-Path -LiteralPath $dll)
+    if (-not $stale) {
+        $built = (Get-Item -LiteralPath $dll).LastWriteTimeUtc
+        $stale = [bool](Get-ChildItem -LiteralPath $src -Recurse -File -Include '*.cs', '*.csproj' |
+            Where-Object { $_.FullName -notmatch '[\\/](obj|bin)[\\/]' -and $_.LastWriteTimeUtc -gt $built })
+    }
+    if ($stale) {
+        if (-not (Get-Command dotnet -CommandType Application -ErrorAction SilentlyContinue)) {
+            Write-Warning 'dotnet がないので、rescomp は rescomp.jar を使います (C# 版を使うには .NET 8 SDK を入れてください)'
+            return $null
+        }
+        Write-Host 'rescomp (C#) をビルド'
+        $log = & dotnet build (Join-Path $src 'RescompCs.csproj') -c Release -o $outDir --nologo -v q 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            $log | ForEach-Object { Write-Host "$_" }
+            Write-Warning 'rescomp (C#) をビルドできなかったので、rescomp.jar を使います'
+            return $null
+        }
+    }
+    $script:RescompCs = $dll
+    return $dll
+}
+function Invoke-Rescomp {
+    $dll = Get-RescompCs
+    if ($dll) {
+        & dotnet $dll @args
+        if ($LASTEXITCODE -eq 0) { return }
+        if ($LASTEXITCODE -ne 3) { throw "build.ps1: rescomp (C#) $($args -join ' ') が失敗しました (終了コード $LASTEXITCODE)" }
+        Write-Host 'まだ C# の rescomp に移していない種類があるので、rescomp.jar で作り直します'
+    }
+    java-jar "$gdk/bin/rescomp.jar" @args
+}
+
 # 出力が古いか、なければ $true
 function Test-Stale([string]$Out, [string]$In) {
     -not (Test-Path -LiteralPath $Out) -or (Get-Item -LiteralPath $In).LastWriteTimeUtc -gt (Get-Item -LiteralPath $Out).LastWriteTimeUtc
@@ -217,7 +264,7 @@ $genAsm = [ordered]@{}
 # res/libres.rs と res/libres.h (makelib.gen と同じく SGDK のフォルダで rescomp を動かす)
 if (Test-Stale "$gen/res/libres.rs" "$gdk/res/libres.res") {
     Push-Location $gdk
-    try { java-jar "$gdk/bin/rescomp.jar" res/libres.res "$gen/res/libres.rs" } finally { Pop-Location }
+    try { Invoke-Rescomp res/libres.res "$gen/res/libres.rs" } finally { Pop-Location }
 }
 $genAsm['res/libres.rs'] = "$gen/res/libres.rs"
 # Z80 のドライバ: 隣にできあがりの .s があるものはそれを使い、ないものは sjasm でアセンブルする
@@ -276,7 +323,7 @@ try {
         $rs = $r -replace '\.res$', '.rs'
         if (Test-Stale $rs $r) {
             Write-Host "rescomp $r"
-            java-jar "$gdk/bin/rescomp.jar" $r $rs -dep ('out/' + ($r -replace '\.res$', '.o'))
+            Invoke-Rescomp $r $rs -dep ('out/' + ($r -replace '\.res$', '.o'))
         }
     }
     $INC = @('-I.', '-Iinc', '-Isrc', '-Ires', '-Iout', "-I$gdk/inc", "-I$gdk/res", "-I$gen")
