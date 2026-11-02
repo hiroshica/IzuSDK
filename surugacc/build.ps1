@@ -172,9 +172,16 @@ function Convert-BinToS([string]$Bin, [string]$OutBase) {
 function Build-S80([string]$Src, [string]$OutBase, [string[]]$IncDirs) {
     New-Item -ItemType Directory -Force (Split-Path $OutBase) | Out-Null
     $sj = Get-Sjasm
+    # sjasm (Windows 版) は見つからないファイルを空の名前で開こうとして止まる (デバッグ版ではアサートのダイアログが出る) ので、
+    # ソース・出力・インクルードのフォルダはすべて OS の区切り文字のフルパスにして渡す (存在しないフォルダは渡さない)
+    $sep = [IO.Path]::DirectorySeparatorChar
+    $full = { param([string]$p) [IO.Path]::GetFullPath($p, (Get-Location).Path).Replace('/', $sep).Replace('\', $sep) }
+    $srcFull = & $full $Src
+    $outFull = & $full $OutBase
+    $incs = @($IncDirs | Where-Object { Test-Path -LiteralPath $_ -PathType Container } | ForEach-Object { '-i' + (& $full $_).TrimEnd($sep) })
     Write-Host "sjasm $Src"
     Remove-Item -LiteralPath "$OutBase.o80" -ErrorAction SilentlyContinue
-    $log = & $sj @($IncDirs | ForEach-Object { "-i$_" }) $Src "$OutBase.o80" "$OutBase.lst" 2>&1
+    $log = & $sj @incs $srcFull "$outFull.o80" "$outFull.lst" 2>&1
     if (-not (Test-Path -LiteralPath "$OutBase.o80")) {
         $log | ForEach-Object { Write-Host "$_" }
         throw "build.ps1: sjasm が $Src をアセンブルできませんでした ($OutBase.lst も見てください)"
