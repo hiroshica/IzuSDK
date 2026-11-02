@@ -8,7 +8,7 @@
 - SurugaCC (`surugacc.exe`)。環境変数 `SURUGACC` か `SURUGACC_HOME` を設定するか、PATH に置く
   (SurugaCC の `setup.ps1 -Persist` で設定できる)
 - PowerShell 7.4 以降 (`pwsh`)
-- Java (今は rescomp.jar と sizebnd.jar を使うため。C# 版に置き換えたら要らなくなる)
+- Java (今は rescomp.jar を使うため。C# 版に置き換えたら要らなくなる。sizebnd.jar はもう使わない)
 - sjasm (Windows では `bin/sjasm.exe` をそのまま使う)
 
 ## 使い方
@@ -40,7 +40,7 @@ git merge upstream/master
 ## これからの予定
 
 1. SurugaCC でビルドできるようにする (このフォルダ)
-2. sizebnd.jar をやめ、`surugacc link --rom-pad --rom-checksum` で済ませる
+2. sizebnd.jar をやめる (済み。同じ計算を build.ps1 の中で行う)
 3. rescomp を C# に移す (拡張用のコンバーターを組み込めるようにする)
 4. スプライト機能を拡充する
 

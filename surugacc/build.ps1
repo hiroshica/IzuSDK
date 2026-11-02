@@ -7,8 +7,8 @@
     makefile.gen / makelib.gen と同じ手順を gcc の代わりに surugacc で行う。
 
     - SGDK は既定でこのスクリプトの一つ上のフォルダ (このリポジトリ) を使う。
-    - リソースの変換 (rescomp.jar) と ROM の大きさ・チェックサムの調整 (sizebnd.jar) は、今は bin/ の Java のツールを使う
-      (java が必要)。C# 版に置き換えたら、ここを差し替える。
+    - リソースの変換は、今は bin/rescomp.jar を使う (java が必要)。C# 版に置き換えたら、ここを差し替える。
+    - ROM の大きさとチェックサムの調整 (sizebnd.jar と同じ計算) はこのスクリプトの中で行う。
     - Z80 のドライバ (*.s80) は sjasm でアセンブルする (Windows では bin/sjasm.exe、それ以外では PATH の sjasm)。
 
     できるもの: プロジェクトの out/rom.bin (ROM) と out/rom.out (ELF)。ライブラリの .o は surugacc/out/lib-O2 などに置き
@@ -177,6 +177,24 @@ function Build-S80([string]$Src, [string]$OutBase, [string[]]$IncDirs) {
     Convert-BinToS "$OutBase.o80" $OutBase
 }
 
+# SGDK の sizebnd.jar (-sizealign $Align -checksum) と同じ: ROM の大きさを $Align の倍数にし (0 で埋める)、
+# ヘッダの 0x18E にチェックサム (ROM 全体を 32 ビットずつ XOR し、上下 16 ビットを XOR したもの) を書く
+function Set-RomSizeAndChecksum([string]$Rom, [int]$Align = 131072) {
+    $data = [IO.File]::ReadAllBytes($Rom)
+    $len = $data.Length
+    $needed = $len -band ($Align - 1)
+    if ($needed -ne 0) { $needed = $Align - $needed }
+    if ($needed -ne 0) { $buf = [byte[]]::new($len + $needed); [Array]::Copy($data, $buf, $len); $data = $buf }
+    $data[0x18E] = 0; $data[0x18F] = 0
+    [uint32]$sum = 0
+    for ($i = 0; $i -lt $data.Length; $i += 4) {
+        $sum = $sum -bxor (([uint32]$data[$i] -shl 24) -bor ([uint32]$data[$i + 1] -shl 16) -bor ([uint32]$data[$i + 2] -shl 8) -bor [uint32]$data[$i + 3])
+    }
+    $c = ($sum -bxor ($sum -shr 16)) -band 0xFFFF
+    $data[0x18E] = [byte]($c -shr 8); $data[0x18F] = [byte]($c -band 0xFF)
+    [IO.File]::WriteAllBytes($Rom, $data)
+}
+
 # ---- ライブラリ
 New-Item -ItemType Directory -Force $lib | Out-Null
 $lib = (Resolve-Path $lib).Path
@@ -288,7 +306,7 @@ try {
     # リンク: md.ld、-nostdlib (crt0 も付けない)、libgcc に当たる関数だけ surugacc の実行時ライブラリから
     $libObjs = @(Get-ChildItem $lib -File -Filter '*.o' | ForEach-Object FullName | Sort-Ordinal)
     cc cc --target megadrive "-O$Opt" -n -T "$gdk/md.ld" -nostdlib out/sega.o @objs @libObjs -lgcc '-Wl,--gc-sections' -o out/rom.bin --elf out/rom.out
-    java-jar "$gdk/bin/sizebnd.jar" out/rom.bin -sizealign 131072 -checksum
+    Set-RomSizeAndChecksum (Join-Path $proj 'out/rom.bin') 131072
     Set-Content -LiteralPath $flagsFile -Value $flags -Encoding utf8
     Write-Host "$proj/out/rom.bin ($((Get-Item out/rom.bin).Length) バイト)"
 } finally { Pop-Location }
