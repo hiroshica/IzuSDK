@@ -303,4 +303,47 @@ public static class Util
             return null;
         }
     }
+
+    // DPCM の差分表 (Java 版の Util.delta_tab)
+    static readonly int[] deltaTab = { -34, -21, -13, -8, -5, -3, -2, -1, 0, 1, 2, 3, 5, 8, 13, 21 };
+
+    static int GetBestDeltaIndex(int wantedLevel, int curLevel)
+    {
+        int wdelta = wantedLevel - curLevel;
+        int ind = 0;
+        int mindiff = Math.Abs(wdelta - deltaTab[ind]);
+        for (int i = 1; i < 16; i++)
+        {
+            int diff = Math.Abs(wdelta - deltaTab[i]);
+            if (diff < mindiff)
+            {
+                mindiff = diff;
+                ind = i;
+            }
+        }
+        int newLevel = deltaTab[ind] + curLevel;
+        // 8 ビット符号付きからはみ出すなら一つ戻す
+        if (newLevel > 127) return ind - 1;
+        if (newLevel < -128) return ind + 1;
+        return ind;
+    }
+
+    /// <summary>8 ビット符号付き PCM を 4 ビット DPCM にする (Java 版の Util.dpcmPack)。</summary>
+    public static byte[] DpcmPack(byte[] input)
+    {
+        var result = new byte[(input.Length / 2) + (input.Length & 1)];
+        int curLevel = 0;
+        int offDst = 0;
+        for (int off = 0; off < input.Length; off += 2)
+        {
+            int ind = GetBestDeltaIndex((sbyte)input[off], curLevel);
+            curLevel += deltaTab[ind];
+            int o = ind;
+            ind = GetBestDeltaIndex(off + 1 < input.Length ? (sbyte)input[off + 1] : 0, curLevel);
+            curLevel += deltaTab[ind];
+            o |= ind << 4;
+            result[offDst++] = (byte)o;
+        }
+        return result;
+    }
 }

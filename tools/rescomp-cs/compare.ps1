@@ -19,6 +19,8 @@ $jar = Join-Path $root 'bin/rescomp.jar'
 & dotnet build (Join-Path $src 'RescompCs.csproj') -c Release -o $outDir --nologo -v q | Out-Null
 if ($LASTEXITCODE -ne 0) { throw 'compare.ps1: C# の rescomp をビルドできませんでした' }
 $dll = Join-Path $outDir 'rescomp.dll'
+# xgmtool / xgm2tool.jar は SGDK の bin にある (Java 版は rescomp.jar の隣を見る)
+$env:SGDK_BIN = Join-Path $root 'bin'
 
 $tmp = Join-Path ([IO.Path]::GetTempPath()) ('rescomp-compare-' + [Guid]::NewGuid().ToString('N').Substring(0, 8))
 $same = 0; $diff = 0; $skip = 0; $fail = 0
