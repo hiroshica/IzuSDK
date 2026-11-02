@@ -204,9 +204,39 @@ static class ExternalTools
         return File.Exists(fout);
     }
 
+    /// <summary>
+    /// C# 版 xgm2tool (tools/xgm2tool-cs) の dll。環境変数 SGDK_XGM2TOOL で指す。
+    /// ないときや、C# 版が対応していない指定 (-ac など。終了コード 3) のときは xgm2tool.jar を使う。
+    /// </summary>
+    static string Xgm2toolCs
+    {
+        get
+        {
+            var dll = Environment.GetEnvironmentVariable("SGDK_XGM2TOOL");
+            return !string.IsNullOrEmpty(dll) && File.Exists(dll) ? dll : null;
+        }
+    }
+
     public static bool Xgm2tool(List<string> fins, string fout, string options)
     {
         try { File.Delete(fout); } catch (IOException) { }
+
+        var cs = Xgm2toolCs;
+        if (cs != null)
+        {
+            var csArgs = new List<string> { cs };
+            csArgs.AddRange(fins);
+            csArgs.Add(fout);
+            if (!string.IsNullOrEmpty(options)) csArgs.Add(options);
+            csArgs.Add("-s");
+
+            Console.WriteLine("Executing " + ("dotnet " + string.Join(" ", csArgs)).Trim());
+            int code = Run("dotnet", csArgs);
+            if (code != ExitNotPorted)
+                return File.Exists(fout);
+            Console.WriteLine("xgm2tool (C#) does not support these options, using xgm2tool.jar");
+            try { File.Delete(fout); } catch (IOException) { }
+        }
 
         var args = new List<string> { "-jar", Path.Combine(ToolDir, "xgm2tool.jar") };
         args.AddRange(fins);
@@ -219,18 +249,23 @@ static class ExternalTools
         return File.Exists(fout);
     }
 
-    static void Run(string exe, List<string> args)
+    const int ExitNotPorted = 3;
+
+    static int Run(string exe, List<string> args)
     {
         var psi = new ProcessStartInfo(exe) { UseShellExecute = false };
         foreach (var a in args) psi.ArgumentList.Add(a);
         try
         {
             using var p = Process.Start(psi);
-            p?.WaitForExit();
+            if (p == null) return -1;
+            p.WaitForExit();
+            return p.ExitCode;
         }
         catch (System.ComponentModel.Win32Exception e)
         {
             Console.Error.WriteLine("Can't run '" + exe + "': " + e.Message);
+            return -1;
         }
     }
 }

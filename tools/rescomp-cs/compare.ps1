@@ -21,6 +21,11 @@ if ($LASTEXITCODE -ne 0) { throw 'compare.ps1: C# の rescomp をビルドでき
 $dll = Join-Path $outDir 'rescomp.dll'
 # xgmtool / xgm2tool.jar は SGDK の bin にある (Java 版は rescomp.jar の隣を見る)
 $env:SGDK_BIN = Join-Path $root 'bin'
+# XGM2 は C# 版 xgm2tool と同じ出力になるかも一緒に確かめる (jar 側の rescomp は xgm2tool.jar のまま)
+$x2Out = Join-Path $PSScriptRoot 'bin/compare-xgm2tool'
+& dotnet build (Join-Path $root 'tools/xgm2tool-cs/src/Xgm2Tool.csproj') -c Release -o $x2Out --nologo -v q | Out-Null
+if ($LASTEXITCODE -ne 0) { throw 'compare.ps1: C# の xgm2tool をビルドできませんでした' }
+$env:SGDK_XGM2TOOL = Join-Path $x2Out 'xgm2tool.dll'
 
 $tmp = Join-Path ([IO.Path]::GetTempPath()) ('rescomp-compare-' + [Guid]::NewGuid().ToString('N').Substring(0, 8))
 $same = 0; $diff = 0; $skip = 0; $fail = 0
