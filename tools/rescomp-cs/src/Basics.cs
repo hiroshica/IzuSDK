@@ -22,3 +22,18 @@ public sealed class PackedData
         Compression = compression;
     }
 }
+
+/// <summary>タイルの一致の種類 (Java 版の TileEquality)。</summary>
+public enum TileEquality { NONE, EQUAL, VFLIP, HFLIP, HVFLIP }
+
+public static class TileEqualityExt
+{
+    public static bool HFlip(this TileEquality e) => e == TileEquality.HFLIP || e == TileEquality.HVFLIP;
+    public static bool VFlip(this TileEquality e) => e == TileEquality.VFLIP || e == TileEquality.HVFLIP;
+}
+
+/// <summary>まだ C# に移していない機能に当たったときの例外 (Program は終了コード 3 を返す)。</summary>
+public sealed class NotPortedException : Exception
+{
+    public NotPortedException(string message) : base(message) { }
+}

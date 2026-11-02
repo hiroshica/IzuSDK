@@ -164,4 +164,314 @@ public static class ImageUtil
         }
         return result;
     }
+
+    public static int AbgrToArgb(int color) => ArgbToAbgr(color);
+
+    /// <summary>
+    /// 画像を 8bpp の画素にする (b0-b3 = 色、b4-b5 = パレット、b7 = 優先度)。
+    /// RGB 画像は左上のパレットのタイルから色を探す。パレットが見つからなければ null。
+    /// </summary>
+    public static byte[] GetImageAs8bpp(string imgFile, bool checkTileAligned, bool removeRGBPalette)
+    {
+        var info = GetBasicInfo(imgFile);
+        if (checkTileAligned)
+        {
+            if ((info.W & 7) != 0)
+                throw new ArgumentException("'" + imgFile + "' width is '" + info.W + ", should be a multiple of 8.");
+            if ((info.H & 7) != 0)
+                throw new ArgumentException("'" + imgFile + "' height is '" + info.H + ", should be a multiple of 8.");
+        }
+
+        if (info.Bpp > 8)
+            return ConvertRGBTo8bpp(imgFile, removeRGBPalette);
+
+        return ConvertTo8bpp(GetIndexedPixels(imgFile), info.Bpp);
+    }
+
+    public static byte[] ConvertTo4bpp(byte[] data, int inputBpp)
+    {
+        switch (inputBpp)
+        {
+            case 1:
+            {
+                var r = new byte[data.Length * 4];
+                for (int i = 0; i < data.Length; i++)
+                    for (int k = 0; k < 4; k++)
+                        r[i * 4 + k] = (byte)((((data[i] >> (7 - 2 * k)) & 1) << 4) | ((data[i] >> (6 - 2 * k)) & 1));
+                return r;
+            }
+            case 2:
+            {
+                var r = new byte[data.Length * 2];
+                for (int i = 0; i < data.Length; i++)
+                {
+                    r[i * 2] = (byte)((((data[i] >> 6) & 3) << 4) | ((data[i] >> 4) & 3));
+                    r[i * 2 + 1] = (byte)((((data[i] >> 2) & 3) << 4) | (data[i] & 3));
+                }
+                return r;
+            }
+            case 4:
+                return data;
+            case 8:
+            {
+                var r = new byte[data.Length / 2];
+                for (int i = 0; i < r.Length; i++)
+                    r[i] = (byte)(((data[i * 2] & 0xF) << 4) | (data[i * 2 + 1] & 0xF));
+                return r;
+            }
+            default:
+                throw new ArgumentException("Not supported image data format (" + inputBpp + " bpp)");
+        }
+    }
+
+    public static byte[] ConvertTo8bpp(byte[] data, int inputBpp)
+    {
+        switch (inputBpp)
+        {
+            case 1:
+            case 2:
+            case 4:
+            {
+                int ppb = 8 / inputBpp;
+                int mask = (1 << inputBpp) - 1;
+                var r = new byte[data.Length * ppb];
+                for (int i = 0; i < data.Length; i++)
+                    for (int k = 0; k < ppb; k++)
+                        r[i * ppb + k] = (byte)((data[i] >> (8 - inputBpp * (k + 1))) & mask);
+                return r;
+            }
+            case 8:
+                return data;
+            default:
+                throw new ArgumentException("Not supported image data format (" + inputBpp + " bpp)");
+        }
+    }
+
+    public static byte[] GetSubImage(byte[] image8bpp, int imageW, int rx, int ry, int rw, int rh)
+    {
+        var result = new byte[rw * rh];
+        int src = (ry * imageW) + rx;
+        int dst = 0;
+        for (int y = 0; y < rh; y++)
+        {
+            Array.Copy(image8bpp, src, result, dst, rw);
+            src += imageW;
+            dst += rw;
+        }
+        return result;
+    }
+
+    /// <summary>RGB 画像を、左上のパレットのタイル (4 行 x 16 色) を使って 8bpp にする。</summary>
+    public static byte[] ConvertRGBTo8bpp(string filename, bool cropPalette)
+    {
+        var info = GetBasicInfo(filename);
+        int w = info.W;
+        int h = info.H;
+
+        if ((w & 7) != 0)
+            throw new ArgumentException("'" + filename + "' width is '" + w + ", should be a multiple of 8 for RGB image.");
+        if ((h & 7) != 0)
+            throw new ArgumentException("'" + filename + "' height is '" + h + ", should be a multiple of 8 for RGB image.");
+
+        var argb = GetARGBPixels(filename);
+
+        int[] palette;
+        try
+        {
+            palette = GetRGBA8888PaletteFromTiles(argb, w, h);
+        }
+        catch (Exception e)
+        {
+            throw new Exception(e.Message + "\nFile: '" + filename + "'");
+        }
+
+        // 色から番号 (小さい順) を引く表
+        var colorMap = new Dictionary<int, List<int>>();
+        for (int c = 0; c < 64; c++)
+        {
+            int color = AbgrToArgb(palette[c]);
+            if (!colorMap.TryGetValue(color, out var list))
+                colorMap[color] = list = new List<int>();
+            list.Add(c);
+        }
+
+        int wt = w / 8;
+        int ht = h / 8;
+        var result = new byte[w * h];
+
+        for (int yt = 0; yt < 4; yt++)
+            for (int xt = 0; xt < wt; xt++)
+            {
+                int off = (yt * 8 * w) + (xt * 8);
+                for (int y = 0; y < 8; y++)
+                {
+                    for (int x = 0; x < 8; x++)
+                        result[off++] = (byte)(xt < 16 ? (yt * 16) + xt : 0);
+                    off += w - 8;
+                }
+            }
+
+        for (int yt = 0; yt < ht; yt++)
+        {
+            for (int xt = 0; xt < wt; xt++)
+            {
+                int off = (yt * 8 * w) + (xt * 8);
+
+                if (yt < 4 && xt < 16)
+                {
+                    for (int y = 0; y < 8; y++)
+                    {
+                        for (int x = 0; x < 8; x++)
+                            result[off++] = (byte)((yt * 16) + xt);
+                        off += w - 8;
+                    }
+                }
+                else if (yt == 0 && xt == 16)
+                {
+                    for (int y = 0; y < 8; y++)
+                    {
+                        for (int x = 0; x < 8; x++)
+                            result[off++] = 0;
+                        off += w - 8;
+                    }
+                }
+                else
+                {
+                    // Java の HashSet<Integer> では 0/16/32/48 は同じ入れ物に入れた順に並ぶので、順番つきのリストで同じになる
+                    if (!colorMap.TryGetValue(argb[off], out var indexes) || indexes.Count == 0)
+                        throw new Exception("'" + filename + "': pixel at position [" + (xt * 8) + "," + (yt * 8) + "] uses a color not present in palette.");
+
+                    var pals = new List<int>();
+                    foreach (var index in indexes)
+                        if (!pals.Contains(index & 0xF0))
+                            pals.Add(index & 0xF0);
+
+                    for (int y = 0; y < 8; y++)
+                    {
+                        if (pals.Count <= 1)
+                            break;
+                        for (int x = 0; x < 8; x++)
+                        {
+                            if (pals.Count <= 1)
+                                break;
+
+                            if (!colorMap.TryGetValue(argb[off], out indexes) || indexes.Count == 0)
+                                throw new Exception("'" + filename + "': pixel at position [" + ((xt * 8) + x) + "," + ((yt * 8) + y) + "] uses a color not present in palette.");
+
+                            var curPals = indexes.Select(i => i & 0xF0).ToHashSet();
+                            pals.RemoveAll(p => !curPals.Contains(p));
+
+                            if (pals.Count == 0)
+                                throw new Exception("'" + filename + "': pixels at position [" + ((xt * 8) + x) + "," + ((yt * 8) + y) + "] use color from a different palette.");
+
+                            off++;
+                        }
+                        off += w - 8;
+                    }
+
+                    int pal = pals[0];
+                    off = (yt * 8 * w) + (xt * 8);
+
+                    for (int y = 0; y < 8; y++)
+                    {
+                        for (int x = 0; x < 8; x++)
+                        {
+                            bool done = false;
+                            if (!colorMap.TryGetValue(argb[off], out indexes) || indexes.Count == 0)
+                                throw new Exception("'" + filename + "': pixel at position [" + ((xt * 8) + x) + "," + ((yt * 8) + y) + "] uses a color not present in palette.");
+
+                            foreach (var index in indexes)
+                            {
+                                if ((index & 0xF0) == pal)
+                                {
+                                    result[off] = (byte)index;
+                                    done = true;
+                                    break;
+                                }
+                            }
+
+                            if (!done)
+                                throw new Exception("'" + filename + "': pixel at position [" + ((xt * 8) + x) + "," + ((yt * 8) + y) + "] use color from a different palette.");
+
+                            off++;
+                        }
+                        off += w - 8;
+                    }
+                }
+            }
+        }
+
+        if (cropPalette)
+            result = GetSubImage(result, w, 0, 4 * 8, w, h - (4 * 8));
+
+        return result;
+    }
+
+    /// <summary>8bpp のインデックスカラー PNG を書く (パレットは 0xAARRGGBB)。</summary>
+    public static void SaveIndexedPng(string path, int w, int h, int[] paletteARGB, byte[] pixels)
+    {
+        using var fs = File.Create(path);
+        fs.Write(new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A });
+
+        void Chunk(string type, byte[] data)
+        {
+            var typeBytes = System.Text.Encoding.ASCII.GetBytes(type);
+            var len = new byte[] { (byte)(data.Length >> 24), (byte)(data.Length >> 16), (byte)(data.Length >> 8), (byte)data.Length };
+            fs.Write(len);
+            fs.Write(typeBytes);
+            fs.Write(data);
+            uint crc = Crc32(data, Crc32(typeBytes, 0xFFFFFFFF, false), true);
+            fs.Write(new byte[] { (byte)(crc >> 24), (byte)(crc >> 16), (byte)(crc >> 8), (byte)crc });
+        }
+
+        Chunk("IHDR", new byte[] { (byte)(w >> 24), (byte)(w >> 16), (byte)(w >> 8), (byte)w, (byte)(h >> 24), (byte)(h >> 16), (byte)(h >> 8), (byte)h, 8, 3, 0, 0, 0 });
+
+        var plte = new byte[paletteARGB.Length * 3];
+        var trns = new byte[paletteARGB.Length];
+        bool hasAlpha = false;
+        for (int i = 0; i < paletteARGB.Length; i++)
+        {
+            plte[i * 3] = (byte)(paletteARGB[i] >> 16);
+            plte[i * 3 + 1] = (byte)(paletteARGB[i] >> 8);
+            plte[i * 3 + 2] = (byte)paletteARGB[i];
+            trns[i] = (byte)(paletteARGB[i] >> 24);
+            hasAlpha |= trns[i] != 0xFF;
+        }
+        Chunk("PLTE", plte);
+        if (hasAlpha)
+            Chunk("tRNS", trns);
+
+        using (var ms = new MemoryStream())
+        {
+            using (var z = new System.IO.Compression.ZLibStream(ms, System.IO.Compression.CompressionLevel.Optimal, true))
+                for (int y = 0; y < h; y++)
+                {
+                    z.WriteByte(0);
+                    z.Write(pixels, y * w, w);
+                }
+            Chunk("IDAT", ms.ToArray());
+        }
+        Chunk("IEND", Array.Empty<byte>());
+    }
+
+    static uint[] crcTable;
+
+    // typeBytes と data を続けて計算するため、途中の値を受け渡す
+    static uint Crc32(byte[] data, uint crc, bool final)
+    {
+        if (crcTable == null)
+        {
+            crcTable = new uint[256];
+            for (uint n = 0; n < 256; n++)
+            {
+                uint c = n;
+                for (int k = 0; k < 8; k++)
+                    c = (c & 1) != 0 ? 0xEDB88320 ^ (c >> 1) : c >> 1;
+                crcTable[n] = c;
+            }
+        }
+        foreach (var b in data)
+            crc = crcTable[(crc ^ b) & 0xFF] ^ (crc >> 8);
+        return final ? crc ^ 0xFFFFFFFF : crc;
+    }
 }

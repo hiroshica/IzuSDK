@@ -20,16 +20,20 @@ public static class Compiler
         // リソース
         new BinProcessor(),
         new PaletteProcessor(),
+        new BitmapProcessor(),
+        new ImageProcessor(),
+        new TilesetProcessor(),
+        new TilemapProcessor(),
     };
 
     /// <summary>Java 版にあって、まだ C# に移していない種類。</summary>
-    static readonly string[] notYetPorted = { "BITMAP", "TILESET", "TILEMAP", "MAP", "OBJECTS", "IMAGE", "SPRITE", "WAV", "XGM", "XGM2" };
+    static readonly string[] notYetPorted = { "MAP", "OBJECTS", "SPRITE", "WAV", "XGM", "XGM2" };
 
     /// <summary>
     /// 種類ごとにまとめて出力する (圧縮が効くように) リソースの型。並びが出力の順番になる。
     /// Java 版の Tilemap・Tileset・Bitmap・Map の順。移したものから足していく。
     /// </summary>
-    public static readonly List<Type> GroupedBinOwnerTypes = new();
+    public static readonly List<Type> GroupedBinOwnerTypes = new() { typeof(Tilemap), typeof(Tileset), typeof(Bitmap) };
 
     /// <summary>BIN より前に、圧縮できるメタデータとして出力する型 (Java 版の VDPSprite・Collision)。</summary>
     public static readonly List<Type> EarlyMetadataTypes = new();
@@ -383,6 +387,13 @@ public static class Compiler
             Console.WriteLine("--> executing plugin " + type + "...");
 
             return processor.Execute(fields.ToArray());
+        }
+        catch (NotPortedException e)
+        {
+            Console.Error.WriteLine();
+            Console.Error.WriteLine("Error: " + e.Message + " (use rescomp.jar for now)");
+            UnsupportedType = true;
+            return null;
         }
         catch (Exception e)
         {

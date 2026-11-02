@@ -21,7 +21,7 @@ if ($LASTEXITCODE -ne 0) { throw 'compare.ps1: C# の rescomp をビルドでき
 $dll = Join-Path $outDir 'rescomp.dll'
 
 $tmp = Join-Path ([IO.Path]::GetTempPath()) ('rescomp-compare-' + [Guid]::NewGuid().ToString('N').Substring(0, 8))
-$same = 0; $diff = 0; $skip = 0
+$same = 0; $diff = 0; $skip = 0; $fail = 0
 try {
     foreach ($r in $Res) {
         $file = (Resolve-Path $r).Path
@@ -38,6 +38,11 @@ try {
             $codeJ = $LASTEXITCODE
         } finally { Pop-Location }
 
+        if ($codeC -ne 0 -and $codeJ -ne 0) {
+            Write-Host "fail  $r (どちらもエラー: C# $codeC / Java $codeJ)" -ForegroundColor Yellow
+            $fail++
+            continue
+        }
         $bad = @()
         if (($codeC -eq 0) -ne ($codeJ -eq 0)) { $bad += "終了コード (C# $codeC / Java $codeJ)" }
         foreach ($e in 's', 'h', 'd') {
@@ -59,5 +64,5 @@ try {
 } finally {
     if ($diff -eq 0) { Remove-Item -Recurse -Force $tmp -ErrorAction SilentlyContinue }
 }
-Write-Host "同じ $same / 違う $diff / 飛ばした $skip"
+Write-Host "同じ $same / 違う $diff / どちらもエラー $fail / 飛ばした $skip"
 if ($diff -gt 0) { exit 1 }

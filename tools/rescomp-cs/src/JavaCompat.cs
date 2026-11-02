@@ -256,4 +256,22 @@ public static class JavaCompat
         }
         return result;
     }
+
+    /// <summary>ArrayUtil.byteToInt(data): ビッグエンディアン (端数のバイトは捨てる)。</summary>
+    public static int[] ByteToInt(byte[] data)
+    {
+        var result = new int[data.Length / 4];
+        for (int i = 0; i < result.Length; i++)
+            result[i] = (data[4 * i] << 24) | (data[4 * i + 1] << 16) | (data[4 * i + 2] << 8) | data[4 * i + 3];
+        return result;
+    }
+
+    /// <summary>ArrayUtil.byteToShort(data): ビッグエンディアン。</summary>
+    public static short[] ByteToShort(byte[] data)
+    {
+        var result = new short[data.Length / 2];
+        for (int i = 0; i < result.Length; i++)
+            result[i] = (short)((data[2 * i] << 8) | data[2 * i + 1]);
+        return result;
+    }
 }

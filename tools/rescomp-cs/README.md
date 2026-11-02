@@ -20,7 +20,7 @@ dotnet surugacc/out/rescomp/rescomp.dll <input.res> [output.s] [-noasm] [-nohead
 | ALIGN / UNGROUP / NEAR | 済み |
 | BIN（NONE / APLIB / LZ4W / FAST / AUTO） | 済み |
 | PALETTE（PNG / BMP / PAL） | 済み（TSX はまだ） |
-| BITMAP / TILESET / TILEMAP / IMAGE | これから |
+| BITMAP / TILESET / TILEMAP / IMAGE | 済み（TSX / TMX はまだ） |
 | SPRITE | これから |
 | MAP / OBJECTS | これから |
 | WAV / XGM / XGM2 | これから |
@@ -35,6 +35,7 @@ pwsh tools/rescomp-cs/compare.ps1 <.res ファイルかフォルダ> ...
 ```
 
 C# 版と rescomp.jar の両方で変換して、`.s` / `.h` / `.d` が同じかどうかを表示します。
+どちらもエラーで止まったものは「どちらもエラー」として別に数えます。
 
 ## 拡張（独自コンバーター）
 
