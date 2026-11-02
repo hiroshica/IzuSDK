@@ -197,6 +197,9 @@ function Get-Sjasm {
 
 # SGDK の bintos と同じ: バイナリ $Bin から、$OutBase.s (.rodata の dc.w の並び) と $OutBase.h (extern const u8 名前[大きさ]) を作る
 function Convert-BinToS([string]$Bin, [string]$OutBase) {
+    # [IO.File] は PowerShell の今のフォルダ (Push-Location) ではなくプロセスのフォルダを基準にするので、フルパスにする
+    $Bin = [IO.Path]::GetFullPath($Bin, (Get-Location).Path)
+    $OutBase = [IO.Path]::GetFullPath($OutBase, (Get-Location).Path)
     $data = [IO.File]::ReadAllBytes($Bin)
     $name = [IO.Path]::GetFileName($OutBase)
     $sb = [Text.StringBuilder]::new()
@@ -239,6 +242,7 @@ function Build-S80([string]$Src, [string]$OutBase, [string[]]$IncDirs) {
 # SGDK の sizebnd.jar (-sizealign $Align -checksum) と同じ: ROM の大きさを $Align の倍数にし (0 で埋める)、
 # ヘッダの 0x18E にチェックサム (ROM 全体を 32 ビットずつ XOR し、上下 16 ビットを XOR したもの) を書く
 function Set-RomSizeAndChecksum([string]$Rom, [int]$Align = 131072) {
+    $Rom = [IO.Path]::GetFullPath($Rom, (Get-Location).Path)
     $data = [IO.File]::ReadAllBytes($Rom)
     $len = $data.Length
     $needed = $len -band ($Align - 1)
