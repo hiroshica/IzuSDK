@@ -107,7 +107,7 @@ SurugaCC（-O2）で `sample/game/sonic` を `run68k.py --profile` で 180 フ�
 | `CMakeLists.txt` | m68k-elf-gcc でライブラリを作る CMake |
 | `build_lib.bat`, `build_samples.bat`, `build_adv.bat` | 上の makefile を呼ぶだけ |
 | `lib/libmd.a`, `lib/libmd_debug.a`, `lib/libmd_debug.dwarf4-O1.cfg`, `lib/libgcc.a` | GCC で作ったライブラリ。SurugaCC は `surugacc/out/` に自分で作り、libgcc に当たる関数は SurugaCC の実行時ライブラリを使う |
-| `bin/` の `gcc.exe`, `cc1.exe`, `cpp.exe`, `as.exe`, `ld.exe`, `ar.exe`, `nm.exe`, `objcopy.exe`, `objdump.exe`, `size.exe`, `gdb.exe`, `lto1.exe`, `lto-wrapper.exe`, `liblto_plugin.dll`, `libgcc_s_dw2-1.dll`, `libstdc++-6.dll` | GCC のツールチェーン |
+| `bin/` の `gcc.exe`, `cc1.exe`, `cpp.exe`, `as.exe`, `ld.exe`, `ar.exe`, `nm.exe`, `objcopy.exe`, `objdump.exe`, `size.exe`, `gdb.exe`, `lto1.exe`, `lto-wrapper.exe`, `liblto_plugin.dll`, `libstdc++-6.dll` | GCC のツールチェーン |
 | `bin/` の `make.exe`, `sh.exe`, `cp.exe`, `mkdir.exe`, `rm.exe`, `msys-*.dll` | makefile を動かすための MSYS の道具 |
 | `bin/` の `mac68k.exe`, `bintos.exe`, `convsym.exe`, `nm2wch.exe`, `sizebnd.jar` | makefile からだけ呼ぶ道具（`bintos` と `sizebnd` の計算は `build.ps1` が自分で行う。シンボルは SurugaCC の ELF を gdb で読む） |
 | `tools/` の `apj`, `bintos`, `commons`, `convsym`, `lz4w`, `rescomp`（Java 版）, `sizebnd`, `xgm rom builder`, `xgm2tool`（Java 版）, `xgmtool`, `settings.gradle` | bin にある道具や jar の元のソース。使っていない（必要なら本家から取れる） |
@@ -117,6 +117,7 @@ SurugaCC（-O2）で `sample/game/sonic` を `run68k.py --profile` で 180 フ�
 残したもの:
 
 - `bin/rescomp.jar`, `xgmtool.exe`, `xgm2tool.jar`, `apj.jar`, `lz4w.jar`, `sjasm.exe`: リソース変換と Z80 のアセンブル（`build.ps1` と rescomp が使う）
+- `bin/libgcc_s_dw2-1.dll`: `xgmtool.exe`（XGM の変換）が使う MinGW の実行時ライブラリ。GCC を消したときにいっしょに消してしまい、XGM を使うプロジェクトの rescomp が失敗していたので戻した
 - `md.ld`, `src/boot/`, `inc/asm_mac.i`: SurugaCC のリンクとアセンブルでも使う
 - `tools/rescomp-cs`, `tools/xgm2tool-cs`: `build.ps1` が dotnet でビルドして使う
 - `tools/sjasm`: Linux・macOS では `bin/sjasm.exe` が使えないので、ここからビルドする
@@ -131,7 +132,6 @@ SurugaCC（-O2）で `sample/game/sonic` を `run68k.py --profile` で 180 フ�
 |---|---|
 | `.github/`（`FUNDING.yml`, `ISSUE_TEMPLATE/`） | 本家のスポンサーと issue のひな形 |
 | `changelog.txt` | 本家のリリースの履歴（git の履歴に残っている） |
-| `COPYING.RUNTIME` | GCC の実行時ライブラリ例外のライセンス。GCC と libgcc はもう使わない（SGDK 自体は `license.txt` の MIT） |
 | `doc/doxyconfig` | 本家の doxygen 設定（本家のサイトに出すためのもの） |
 | `doc/img/` | 本家の `readme.md` に貼っていたゲームの画像 |
 | `executing` | 中身が空のファイル |
@@ -147,6 +147,7 @@ SurugaCC（-O2）で `sample/game/sonic` を `run68k.py --profile` で 180 フ�
 残したもの:
 
 - `license.txt`: SGDK のライセンス（MIT）。ソースの作者の表記も残す
+- `COPYING.RUNTIME`: `bin/libgcc_s_dw2-1.dll` を配るためのライセンス（GCC の実行時ライブラリ例外）
 - `inc/config.h` の `LEGACY_ERROR_HANDLER` と `LEGACY_FONT_LOCATION`: 今も選べる設定（`LEGACY_FONT_LOCATION` は 1 で使っている）
 - ヘッダーの `_Pragma("GCC error ...")`: 使わなくなった API の名前を使ったときにエラーで知らせるための目印。ふだんのビルドには関係しない
 - `setup.bat`, `memo.md`, `SGDK.code-workspace`: このフォークで足したもの

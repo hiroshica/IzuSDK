@@ -28,7 +28,7 @@ surugacc\build.cmd sample\basics\hello-world  # プロジェクトをビルド�
 | `inc/`, `src/`, `res/` | ライブラリのヘッダー、ソース、ライブラリのリソース |
 | `surugacc/` | SurugaCC でビルドするスクリプト |
 | `tools/` | C# 版の rescomp / xgm2tool と sjasm（Z80 アセンブラ）のソース |
-| `bin/` | ビルドで使う道具（rescomp.jar, xgmtool, xgm2tool.jar, apj.jar, lz4w.jar, sjasm.exe） |
+| `bin/` | ビルドで使う道具（rescomp.jar, xgmtool.exe と libgcc_s_dw2-1.dll, xgm2tool.jar, apj.jar, lz4w.jar, sjasm.exe） |
 | `doc/` | このフォークの説明 |
 | `project/template/` | 新しいプロジェクトのひな形 |
 | `sample/` | サンプル（本家のものとこのフォークで足したもの） |
@@ -36,3 +36,4 @@ surugacc\build.cmd sample\basics\hello-world  # プロジェクトをビルド�
 ## ライセンス
 
 SGDK のライブラリと道具は MIT ライセンスです（[license.txt](license.txt)）。
+`bin/libgcc_s_dw2-1.dll`（xgmtool.exe が使う）は GCC の実行時ライブラリ例外つきの GPL です（[COPYING.RUNTIME](COPYING.RUNTIME)）。
