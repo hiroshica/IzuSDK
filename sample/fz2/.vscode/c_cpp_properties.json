@@ -1,0 +1,20 @@
+{
+    "configurations": [
+        {
+            "name": "SGDK",
+            "browse": {
+                "path": [
+                    "${workspaceFolder}"
+                ],
+                "limitSymbolsToIncludedHeaders" : true
+            },
+            "includePath": [
+                "${workspaceFolder}/inc/",
+                "${workspaceFolder}/res/",
+                "${env:SGDK}/inc/**",
+                "${env:SGDK}/src/**"
+            ],
+        }
+    ],
+    "version": 4
+}

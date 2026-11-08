@@ -52,3 +52,4 @@ wip.txt
 backup-before-debug-patch/
 sample/dbgsample/
 */rom.bin
+*.bak

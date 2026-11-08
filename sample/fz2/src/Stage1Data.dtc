@@ -1,0 +1,191 @@
+#include <common.h>
+
+// clang-format off
+//-----------------------------------------------------------------------------------------------------------------
+#define STAGE1_OFSY (16)
+
+BGBase Stage0_Base0[] =
+{
+    {
+        FASTFIX32(16),FASTFIX32(16+STAGE1_OFSY),
+        NULL,
+        BG_Mode_Active,
+        BG_Mode_Warp_Area,
+        10,
+        0,
+        0
+    },
+    {
+        FASTFIX32(120),FASTFIX32(88+STAGE1_OFSY),
+        NULL,
+        BG_Mode_Active,
+        BG_Mode_None,
+        10,
+        0,
+        0
+    },
+    {
+        FASTFIX32(224),FASTFIX32(8+STAGE1_OFSY),
+        NULL,
+        BG_Mode_Active,
+        BG_Mode_None,
+        10,
+        0,
+        0
+    },
+    {
+        FASTFIX32(312),FASTFIX32(96+STAGE1_OFSY),
+        NULL,
+        BG_Mode_Active,
+        BG_Mode_None,
+        10,
+        0,
+        0
+    },
+    {
+        FASTFIX32(432),FASTFIX32(48+STAGE1_OFSY),
+        NULL,
+        BG_Mode_Active,
+        BG_Mode_Warp_Area,
+        10,
+        0,
+        0
+    },
+};
+BGBase Stage0_Base1[] =
+{
+    {
+        FASTFIX32(48),FASTFIX32(16+STAGE1_OFSY),
+        NULL,
+        BG_Mode_Active,
+        BG_Mode_None,
+        10,
+        0,
+        0
+    },
+    {
+        FASTFIX32(160),FASTFIX32(32+STAGE1_OFSY),
+        NULL,
+        BG_Mode_Active,
+        BG_Mode_Warp_Area,
+        10,
+        0,
+        0
+    },
+    {
+        FASTFIX32(280),FASTFIX32(8+STAGE1_OFSY),
+        NULL,
+        BG_Mode_Active,
+        BG_Mode_None,
+        10,
+        0,
+        0
+    },
+    {
+        FASTFIX32(360),FASTFIX32(120+STAGE1_OFSY),
+        NULL,
+        BG_Mode_Active,
+        BG_Mode_None,
+        10,
+        0,
+        0
+    },
+    {
+        FASTFIX32(464),FASTFIX32(96+STAGE1_OFSY),
+        NULL,
+        BG_Mode_Active,
+        BG_Mode_Warp_Area,
+        10,
+        0,
+        0
+    },
+};
+BGBase Stage0_Base2[] = 
+{
+    {
+        FASTFIX32(64),FASTFIX32(40+STAGE1_OFSY),
+        NULL,
+        BG_Mode_Active,
+        BG_Mode_None,
+        10,
+        0,
+        0
+    },
+    {
+        FASTFIX32(152),FASTFIX32(16+STAGE1_OFSY),
+        NULL,
+        BG_Mode_Active,
+        BG_Mode_Warp_Boss,
+        10,
+        0,
+        0
+    },
+    {
+        FASTFIX32(256),FASTFIX32(16+STAGE1_OFSY),
+        NULL,
+        BG_Mode_Active,
+        BG_Mode_Warp_Area,
+        10,
+        0,
+        0
+    },
+    {
+        FASTFIX32(328),FASTFIX32(40+STAGE1_OFSY),
+        NULL,
+        BG_Mode_Active,
+        BG_Mode_None,
+        10,
+        0,
+        0
+    },
+    {
+        FASTFIX32(440),FASTFIX32(64+STAGE1_OFSY),
+        NULL,
+        BG_Mode_Active,
+        BG_Mode_Warp_Area,
+        10,
+        0,
+        0
+    },
+};
+
+
+Stage_Record Stage1 = 
+{
+    &Stage1_base_tileset,
+    3,
+    {
+        {
+            &palette1_0,
+            &bga_tileset1_0,
+            &bga_map1_0,
+            &bgb_tileset1_0,
+            &bgb_map1_0,
+            512,
+            5,
+            Stage0_Base0
+        },
+        {
+            &palette1_1,
+            &bga_tileset1_1,
+            &bga_map1_1,
+            &bgb_tileset1_1,
+            &bgb_map1_1,
+            512,
+            5,
+            Stage0_Base1
+        },
+        {
+            &palette1_2,
+            &bga_tileset1_2,
+            &bga_map1_2,
+            &bgb_tileset1_2,
+            &bgb_map1_2,
+            512,
+            5,
+            Stage0_Base2
+        },
+    },
+};
+//-----------------------------------------------------------------------------------------------------------------
+// clang-format on
