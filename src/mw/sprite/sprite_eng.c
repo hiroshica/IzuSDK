@@ -1,8 +1,6 @@
 #include "config.h"
 #include "types.h"
 
-#if      !LEGACY_SPRITE_ENGINE
-
 #include "sprite_eng.h"
 
 #include "sys.h"
@@ -2264,5 +2262,3 @@ static void logSprite(Sprite* sprite)
     KLog_U2("visibility=", sprite->visibility, " timer=", sprite->timer);
     KLog_U2("prev=", (sprite->prev == NULL) ? 128 : getSpriteIndex(sprite->prev), " next=", (sprite->next == NULL) ? 128 : getSpriteIndex(sprite->next));
 }
-
-#endif

@@ -3,8 +3,8 @@
     この SGDK (フォーク) のプロジェクトを SurugaCC でメガドライブの ROM にする。
 
 .DESCRIPTION
-    SurugaCC の tools/sgdk.ps1 をもとにした、このリポジトリ用の入口。本家のファイル (makefile.gen など) は使わず、
-    makefile.gen / makelib.gen と同じ手順を gcc の代わりに surugacc で行う。
+    SurugaCC の tools/sgdk.ps1 をもとにした、このリポジトリ用の入口 (このフォークのビルドはこれだけ)。
+    本家 SGDK の makefile.gen / makelib.gen と同じ手順を surugacc で行う。
 
     - SGDK は既定でこのスクリプトの一つ上のフォルダ (このリポジトリ) を使う。
     - リソースの変換は C# 版の rescomp (tools/rescomp-cs。dotnet があれば surugacc/out/rescomp に自動でビルドする) を使う。
@@ -14,7 +14,7 @@
     - Z80 のドライバ (*.s80) は sjasm でアセンブルする (Windows では bin/sjasm.exe、それ以外では PATH の sjasm)。
 
     できるもの: プロジェクトの out/rom.bin (ROM) と out/rom.out (ELF)。ライブラリの .o は surugacc/out/lib-O2 などに置き
-    (本家の lib/ には何も作らない。out/ は .gitignore で無視される)、
+    (out/ は .gitignore で無視される)、
     --gc-sections で使うものだけをリンクする。
 
     surugacc の探し方 (上から順に):
@@ -116,9 +116,9 @@ if (-not (Test-Path "$gdk/bin/rescomp.jar")) {
 }
 
 # SGDK の makefile.gen / makelib.gen と同じオプション (警告などのオプションは surugacc では意味がないので省く)
-$CFLAGS = @('--target', 'megadrive', '-m68000', "-O$Opt", '-DSGDK_GCC', '-fno-builtin', '-fms-extensions', '-ffunction-sections', '-fdata-sections') + $debug
+$CFLAGS = @('--target', 'megadrive', '-m68000', "-O$Opt", '-fno-builtin', '-fms-extensions', '-ffunction-sections', '-fdata-sections') + $debug
 if ($g) { $CFLAGS += '-DDEBUG=1' }
-$AFLAGS = @('--target', 'megadrive', '-m68000', '-x', 'assembler-with-cpp', '-Wa,--register-prefix-optional,--bitwise-or', '-DSGDK_GCC') + $debug
+$AFLAGS = @('--target', 'megadrive', '-m68000', '-x', 'assembler-with-cpp', '-Wa,--register-prefix-optional,--bitwise-or') + $debug
 
 # ---- rescomp: C# 版 (tools/rescomp-cs) を使い、まだ C# に移していない種類があれば rescomp.jar で作り直す
 # 環境変数 SGDK_RESCOMP=java で、いつも rescomp.jar を使う

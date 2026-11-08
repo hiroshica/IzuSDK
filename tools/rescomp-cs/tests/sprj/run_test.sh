@@ -13,7 +13,7 @@ dotnet build "$SGDK/tools/rescomp-cs/src/RescompCs.csproj" -c Release -o "$OUT/r
 # same assembler options as SGDK / surugacc ('|' is bitwise or, not a comment)
 cp "$OUT/test.s" "$OUT/test.rs"
 m68k-linux-gnu-gcc -m68000 -x assembler-with-cpp -Wa,--register-prefix-optional,--bitwise-or,--noexecstack -c "$OUT/test.rs" -o "$OUT/test_s.o"
-CFLAGS="-DSGDK_GCC -O1 -Wall -Wno-unused-parameter -fno-builtin -fms-extensions -I$SGDK/inc -I$SGDK/res -I$OUT"
+CFLAGS="-O1 -Wall -Wno-unused-parameter -fno-builtin -fms-extensions -I$SGDK/inc -I$SGDK/res -I$OUT"
 m68k-linux-gnu-gcc $CFLAGS -c "$SGDK/src/mw/sprite/sprx.c" -o "$OUT/sprx.o"
 m68k-linux-gnu-gcc $CFLAGS -c "$HERE/sprx_test.c" -o "$OUT/sprx_test.o"
 m68k-linux-gnu-gcc -static -o "$OUT/sprx_test" "$OUT/sprx_test.o" "$OUT/sprx.o" "$OUT/test_s.o"

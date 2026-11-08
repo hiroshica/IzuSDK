@@ -1,0 +1,16 @@
+#define BGM_MIN 1
+#define BGM_00TITLE 1
+#define BGM_01ROUND1 2
+#define BGM_02ROUND2 3
+#define BGM_03ROUND3 4
+#define BGM_04ROUND4 5
+#define BGM_05ROUND5 6
+#define BGM_06ROUND6 7
+#define BGM_07ROUND7 8
+#define BGM_08BOSS 9
+#define BGM_09LASTBOSS 10
+#define BGM_10SHOP 11
+#define BGM_11ROUND_CLEAR 12
+#define BGM_12GAMEOVER 13
+#define BGM_13ENDINGTHEME 14
+#define BGM_MAX 14

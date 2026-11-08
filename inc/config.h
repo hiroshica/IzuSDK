@@ -75,9 +75,8 @@
 
 /**
  *  \brief
- *      Set it to 1 if you want to use the old sprite engine instead of the new one.<br>
- *      The old sprite engine allow to access or change the internal VDP sprite indexes, this can be useful in some situations (as sprite multiplexing).<br>
- *      The new sprite engine provide better VDP sprite usage in general allowing to display a bit more sprites in practice.
+ *      The legacy sprite engine has been removed from this fork (the default engine with SPRX is the only one).<br>
+ *      Always 0, kept only for code that still tests it. Do not change it.
  */
 #define LEGACY_SPRITE_ENGINE    0
 
@@ -209,10 +208,9 @@
 /**
  *  \brief
  *      SPRX (extended frames, SPRJ JSON sprite resource, see sprx.h) is the main sprite path of this fork.<br>
- *      It is always enabled with the default sprite engine and not available with the legacy one (LEGACY_SPRITE_ENGINE = 1).<br>
- *      Kept for compatibility with code testing MODULE_SPRITE_EXT.
+ *      It is always enabled. Kept for compatibility with code testing MODULE_SPRITE_EXT.
  */
-#define MODULE_SPRITE_EXT       (LEGACY_SPRITE_ENGINE == 0)
+#define MODULE_SPRITE_EXT       1
 // [V1] SPRX end
 
 #endif // _CONFIG_

@@ -7,7 +7,6 @@
  * another sprite engine at run time (cost: one indirect call per frame, about 16 cycles).
  *
  * The default port is the built-in engine with SPRX (extended frames) support: SPR_updateDefault().
- * Not available with LEGACY_SPRITE_ENGINE = 1 (the legacy engine has its own SPR_update()).
  */
 
 #ifndef _MW_SPRITE_PORT_H_
@@ -15,8 +14,6 @@
 
 #include "config.h"
 #include "types.h"
-
-#if (LEGACY_SPRITE_ENGINE == 0)
 
 /**
  *  \brief
@@ -56,7 +53,5 @@ void SPR_setEnginePort(const SpriteEnginePort* port);
  *      Current sprite engine port.
  */
 const SpriteEnginePort* SPR_getEnginePort(void);
-
-#endif // LEGACY_SPRITE_ENGINE
 
 #endif // _MW_SPRITE_PORT_H_
