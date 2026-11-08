@@ -6,8 +6,6 @@
 
 #include "mw/sprite_port.h"
 
-#if (LEGACY_SPRITE_ENGINE == 0)
-
 const SpriteEnginePort sprEnginePortDefault =
 {
     "default+SPRX",
@@ -36,4 +34,3 @@ void SPR_update(void)
     updateFn();
 }
 
-#endif // LEGACY_SPRITE_ENGINE

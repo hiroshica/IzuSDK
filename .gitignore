@@ -17,36 +17,19 @@
 *.ini
 *.rs
 *.d
-**/cmd_
 **/.DS_Store
 **/.settings/**
 **/out
 **/res/*.h
 !**/out/rom.bin
-!out/release/res/*.h
-!out/debug/res/*.h
 **/symbol.txt
 **/rom_head.bin
 **/Debug
 **/Release
 archive
-cb
 not needed
 sample/sound/loss
-tools/archives
-tools/extras
-tools/old
-tools/genesis_tools.workspace
-tools/emu
-tools/lz4w/test
-tools/lz4w/lz4w.jar
-tools/rescomp/format
-tools/rescomp/rescomp.jar
-tools/xgm rom builder
 project/test
-tools/.gradle/
-tools/.project
-tools/build/
 wip.txt
 .github/copilot-instructions.md
 backup-before-debug-patch/

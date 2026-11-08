@@ -61,8 +61,7 @@ extern const SprxInfo name;
 
 ## 実行時の使い方
 
-`genesis.h` から `sprx.h` がいつも読まれます（標準のスプライトエンジンを使っているとき。`LEGACY_SPRITE_ENGINE` を 1 にした古いエンジンでは使えません）。
-以前の `ext/sprite_eng_ext.h` も、`sprx.h` を読むだけのファイルとして残してあります。
+`genesis.h` から `sprx.h` がいつも読まれます（古いスプライトエンジン `sprite_eng_legacy` は削除しました）。
 
 ### RESIDENT（同じ絵を何体も出すもの）
 
@@ -128,11 +127,11 @@ if (SPRX_getBox(spr, SPRX_KIND_HIT, 0, &r))   // 基準点からの相対。ス�
 | `src/mw/sprite/sprite_eng.c` | 標準のスプライトエンジン。`SPR_update()` の SAT を作る部分で拡張コマなら `SPRX_fillVDPSprites` を呼ぶ |
 | `inc/mw/sprite_port.h`, `src/mw/sprite/sprite_port.c` | スプライトエンジンのポート。`SPR_update()` だけは実行中に差し替えられる（`SPR_setEnginePort`） |
 | `inc/sprite_eng.h` | `SPR_FLAG_EXT_FRAME`（0x0080）と `SPR_FLAG_MASK` への追加 |
-| `inc/config.h` | `MODULE_SPRITE_EXT`（互換のため残した。`LEGACY_SPRITE_ENGINE == 0` のとき 1） |
+| `inc/config.h` | `MODULE_SPRITE_EXT`（互換のため残した。いつも 1） |
 
-本家が `SPR_update()` の SAT 作成部分、`FrameVDPSprite`、`AnimationFrame`、`Sprite` の status ビットを変えたときは、
+`SPR_update()` の SAT 作成部分、`FrameVDPSprite`、`AnimationFrame`、`Sprite` の status ビットを変えるときは、
 `src/mw/sprite/sprx.c` の `SPRX_fillVDPSprites()` と rescomp-cs の `SprxFrameRes` を合わせて直してください。
-本家の `SPR_update()` は、このフォークでは `SPR_updateDefault()` という名前になっています（`SPR_update()` はポートを通して呼びます）。
+本家 SGDK の `SPR_update()` は、このフォークでは `SPR_updateDefault()` という名前になっています（`SPR_update()` はポートを通して呼びます）。
 
 ### スプライトエンジンを差し替える
 

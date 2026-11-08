@@ -1,7 +1,7 @@
 # surugacc/ — SurugaCC でこの SGDK をビルドする
 
-このフォルダは、本家 SGDK のファイルを変えずに、自前の C# 製コンパイラ SurugaCC でビルドするための追加分です。
-本家の更新を取り込みやすくするため、このフォークで足すものはできるだけこのフォルダ (と、今後足す新しいフォルダ) に置きます。
+このフォークのビルドは、自前の C# 製コンパイラ SurugaCC で行います (GCC・make は使いません)。
+このフォルダはそのための入口です。本家 SGDK の更新はもう取り込まないので、本家のファイルとの差は気にせず直してかまいません。
 
 ## 要るもの
 
@@ -32,24 +32,14 @@ pwsh surugacc/build.ps1 -LibOnly                   # ライブラリだけ
 
 - SGDK は既定でこのリポジトリを使う (`-Sgdk` で別の SGDK も指定できる)。
 - できるもの: プロジェクトの `out/rom.bin` と `out/rom.out` (ELF)。
-- ライブラリの .o は `surugacc/out/lib-O2` などに置く (本家の `lib/` には何も作らない)。
+- ライブラリの .o は `surugacc/out/lib-O2` などに置く。
 
-SurugaCC の `tools/sgdk.ps1` をもとに、このリポジトリ (本家 master 相当) 用に絞ったものです。
+SurugaCC の `tools/sgdk.ps1` をもとに、このリポジトリ用に絞ったものです。
 
 ## ライブラリの構成 (V1)
 
 ライブラリのソースは層ごとに `src/hal` / `src/mw` / `src/util` に分けてあります (`doc/v1_layers.md`)。
 ヘッダーを変えるとライブラリを全部作り直し、移動前のソースの古い .o は自動で消します。
-
-## 本家の更新を取り込む
-
-```
-git remote add upstream https://github.com/Stephane-D/SGDK.git   # 最初の一回だけ
-git fetch upstream
-git merge upstream/master
-```
-
-本家のファイルを変えていなければ、ぶつかるのはこのフォルダの外で足したものだけです。
 
 ## これからの予定
 
