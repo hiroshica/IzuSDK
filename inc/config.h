@@ -205,4 +205,13 @@
  */
 #define MODULE_LINK_CABLE       0
 
+// [EXT] SPRX begin
+/**
+ *  \brief
+ *      Set it to 1 to enable the sprite engine extension (extended frames, SPRJ resource, see ext/sprite_eng_ext.h).<br>
+ *      Fork-only extension, set it to 0 to get the exact upstream sprite engine behavior.
+ */
+#define MODULE_SPRITE_EXT       1
+// [EXT] SPRX end
+
 #endif // _CONFIG_
