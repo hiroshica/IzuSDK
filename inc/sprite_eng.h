@@ -81,7 +81,7 @@
 // [EXT] SPRX begin
 /**
  *  \brief
- *      Sprite uses extended frames (see ext/sprite_eng_ext.h). Fork-only extension.
+ *      Sprite uses extended frames (see sprx.h). Fork-only: SPRX main sprite path.
  */
 #define SPR_FLAG_EXT_FRAME                      0x0080
 // [EXT] SPRX end

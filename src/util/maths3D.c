@@ -4,7 +4,6 @@
 #include "maths.h"
 #include "maths3D.h"
 
-#include "bmp.h"
 
 
 Context3D context3D;
@@ -14,8 +13,8 @@ void M3D_reset()
 {
     context3D.lightEnabled = FALSE;
 
-    // we assume default viewport for BMP drawing
-    M3D_setViewport(BMP_WIDTH, BMP_HEIGHT);
+    // we assume default viewport for BMP drawing ([V1] constants: maths3D no longer depends on bmp.h, bmp.c checks they match)
+    M3D_setViewport(M3D_DEFAULT_VIEWPORT_WIDTH, M3D_DEFAULT_VIEWPORT_HEIGHT);
     // default camera distance
     context3D.camDist = FIX16(20);
 

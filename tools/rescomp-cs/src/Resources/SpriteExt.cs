@@ -6,7 +6,7 @@ using Sgdk.Rescomp.Types;
 
 namespace Sgdk.Rescomp.Resources;
 
-// [EXT] SPRX: resources for the SPRJ resource type (JSON sprite -> extended frames, see inc/ext/sprite_eng_ext.h).
+// [EXT] SPRX: resources for the SPRJ resource type (JSON sprite -> extended frames, see inc/sprx.h).
 
 public enum SprxVramMode { RESIDENT = 0, TRANSFER = 1 }
 

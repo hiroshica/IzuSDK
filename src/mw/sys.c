@@ -29,6 +29,7 @@
 
 #include "hal/hal_cpu.h"
 #include "mw/sched.h"
+#include "mw/sprite_port.h"
 
 #if (ENABLE_LOGO != 0)
 #define LOGO_SIZE                   64
@@ -94,7 +95,9 @@ VoidCallback *vblankCB;
 __attribute__((externally_visible)) u16 VBlankProcess;
 
 // [V1] interrupt hooks / intTrace / intLevelSave / SYS_disableInts() moved to the CPU HAL (src/hal/hal_cpu.c)
-static u16 flags;
+// frame load display flags (read by the VBlank scheduler, src/mw/sched.c)
+u16 sysFlags;
+#define flags sysFlags
 
 // store last frames CPU load (in [0..255] range), need to shared as it can be updated by vdp.c unit
 static u16 frameLoads[LOAD_MEAN_FRAME_NUM];
@@ -606,6 +609,10 @@ static NO_INLINE void internal_reset()
     // important to do it *before* VDP_init
     spritesPool = NULL;
     spriteVramSize = 0;
+#if (LEGACY_SPRITE_ENGINE == 0)
+    // [V1] default sprite engine port (built-in engine with SPRX)
+    SPR_setEnginePort(NULL);
+#endif
 
     // init part (always do MEM_init() first)
     MEM_init();
@@ -630,7 +637,7 @@ static NO_INLINE void internal_reset()
 // frame load display, called by the VBlank scheduler after the user VBlank callback
 void SYS_doFrameLoadDisplay(void)
 {
-    // frame load display enabled ?
+    // frame load display enabled ? (also tested by the caller)
     if (flags & SHOW_FRAME_LOAD)
     {
         // use internal sprite 0 to show cursor
@@ -859,4 +866,16 @@ void SYS_die(char *err, ...)
     va_end(argptr);
 
     while(1);
+}
+
+
+// [V1] moved from tools.c (util layer)
+u32 getFPS()
+{
+    return SYS_getFPS();
+}
+
+fix32 getFPS_f()
+{
+    return SYS_getFPSAsFloat();
 }

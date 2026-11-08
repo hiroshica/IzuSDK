@@ -3,14 +3,11 @@
 
 #include "tools.h"
 
-#include "sys.h"
 #include "string.h"
 #include "kdebug.h"
-#include "timer.h"
 #include "maths.h"
 #include "memory.h"
-#include "mapper.h"
-#include "vdp.h"
+#include "mapper.h"     // FAR_SAFE (bank switch, HAL)
 
 
 // forward
@@ -43,15 +40,7 @@ u16 random()
     return randbase;
 }
 
-u32 getFPS()
-{
-    return SYS_getFPS();
-}
-
-fix32 getFPS_f()
-{
-    return SYS_getFPSAsFloat();
-}
+// [V1] getFPS() / getFPS_f() moved to sys.c (they use the system frame counter, util must not depend on it)
 
 
 int kprintf(const char *fmt, ...)

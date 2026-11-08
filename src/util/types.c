@@ -1,5 +1,5 @@
 #include "types.h"
-#include "sys.h"
+#include "sys.h"     // FORCE_INLINE / NO_INLINE attribute macros
 
 
 FORCE_INLINE u8 getZeroU8()

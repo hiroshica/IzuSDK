@@ -18,6 +18,11 @@
 #include "tools.h"
 #include "string.h"
 #include "hal/hal_cpu.h"
+#include "maths3D.h"
+
+#if (BMP_WIDTH != M3D_DEFAULT_VIEWPORT_WIDTH) || (BMP_HEIGHT != M3D_DEFAULT_VIEWPORT_HEIGHT)
+#error "M3D_DEFAULT_VIEWPORT_WIDTH / HEIGHT (maths3D.h) must match BMP_WIDTH / BMP_HEIGHT"
+#endif
 
 
 #define BMP_FLAG_DOUBLEBUFFER   (1 << 0)

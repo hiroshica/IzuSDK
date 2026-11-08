@@ -10,6 +10,8 @@
 #include "tools.h"
 #include "timer.h"
 
+#include "hal/hal_dma.h"
+
 
 //#define DMA_DEBUG
 
@@ -41,7 +43,6 @@ static u16 queueIndexLimit;
 static u16 queueTransferSize;
 
 // do not share (assembly methods)
-extern void flushQueue(u16 num);
 
 
 // [V1] VBlank DMA task, bound to SCHED_TASK_DMA by sys.c (was inlined in SYS_doVBlankProcessEx)
@@ -585,57 +586,33 @@ NO_INLINE void DMA_doDmaFast(u8 location, void* from, u16 to, u16 len, s16 step)
     // DMA disabled --> replace with software copy
     DMA_doCPUCopy(location, from, to, len, step);
 #else
-    vu16 *pw;
-    u32 cmd;
-    u32 fromAddr;
     vu32 cmdbuf[1];
-    u16* cmdbufp;
+    vu16* cmdp = (vu16*) cmdbuf;
 #if (HALT_Z80_ON_DMA != 0)
     bool busTaken;
 #endif  // HALT_Z80_ON_DMA
 
-    fromAddr = (u32) from;
-
-    if (step != -1)
-        VDP_setAutoInc(step);
-
-    pw = (vu16*) VDP_CTRL_PORT;
-
-    // Setup DMA length (in word here)
-    *pw = 0x9300 + (len & 0xff);
-    *pw = 0x9400 + ((len >> 8) & 0xff);
-
-    // Setup DMA address
-    fromAddr >>= 1;
-    *pw = 0x9500 + (fromAddr & 0xff);
-    fromAddr >>= 8;
-    *pw = 0x9600 + (fromAddr & 0xff);
-    fromAddr >>= 8;
-    *pw = 0x9700 + (fromAddr & 0x7f);
+    // [V1] DMA registers through the DMA HAL
+    hal_dma_load_regs(len, from, step);
 
     switch(location)
     {
         default:
         case DMA_VRAM:
-            cmd = VDP_DMA_VRAM_ADDR((u32)to);
+            cmdbuf[0] = hal_vdp_cmd_vram_dma((u32)to);
             break;
 
         case DMA_CRAM:
-            cmd = VDP_DMA_CRAM_ADDR((u32)to);
+            cmdbuf[0] = hal_vdp_cmd_cram_dma((u32)to);
             break;
 
         case DMA_VSRAM:
-            cmd = VDP_DMA_VSRAM_ADDR((u32)to);
+            cmdbuf[0] = hal_vdp_cmd_vsram_dma((u32)to);
             break;
     }
 
-    // force storing DMA command into memory
-    cmdbuf[0] = cmd;
-
-    // then force issuing DMA from memory word operand
-    cmdbufp = (u16*) cmdbuf;
-    // first command word
-    *pw = *cmdbufp++;
+    // first command word (DMA command stored in memory, second word issued from memory operand)
+    hal_dma_start_first(cmdp);
 
 #if (HALT_Z80_ON_DMA != 0)
     // disable Z80 before processing DMA
@@ -643,7 +620,7 @@ NO_INLINE void DMA_doDmaFast(u8 location, void* from, u16 to, u16 len, s16 step)
 #endif  // HALT_Z80_ON_DMA
 
     // trigger DMA (second word command wrote from memory to avoid possible failure on some MD)
-    *pw = *cmdbufp;
+    hal_dma_start_second(cmdp);
 
 #if (HALT_Z80_ON_DMA != 0)
     // re-enable Z80 after DMA

@@ -36,6 +36,11 @@ pwsh surugacc/build.ps1 -LibOnly                   # ライブラリだけ
 
 SurugaCC の `tools/sgdk.ps1` をもとに、このリポジトリ (本家 master 相当) 用に絞ったものです。
 
+## ライブラリの構成 (V1)
+
+ライブラリのソースは層ごとに `src/hal` / `src/mw` / `src/util` に分けてあります (`doc/v1_layers.md`)。
+ヘッダーを変えるとライブラリを全部作り直し、移動前のソースの古い .o は自動で消します。
+
 ## 本家の更新を取り込む
 
 ```

@@ -1,10 +1,10 @@
-// [EXT] SPRX : fork-only extension (not part of upstream SGDK), see inc/ext/sprite_eng_ext.h
+// [V1] SPRX : main sprite path of this fork (not part of upstream SGDK), see inc/sprx.h. Was src/ext/sprite_eng_ext.c
 #include "config.h"
 #include "types.h"
 
 #if (MODULE_SPRITE_EXT != 0)
 
-#include "ext/sprite_eng_ext.h"
+#include "sprx.h"
 #include "sprite_eng.h"
 #include "vdp_tile.h"
 #include "vram.h"

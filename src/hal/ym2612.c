@@ -1,10 +1,9 @@
 #include "config.h"
 #include "types.h"
-#include "sys.h"
+#include "sys.h"     // FORCE_INLINE / NO_INLINE attribute macros
 
 #include "ym2612.h"
 
-#include "vdp.h"
 #include "z80_ctrl.h"
 
 

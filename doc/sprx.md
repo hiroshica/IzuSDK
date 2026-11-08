@@ -1,6 +1,6 @@
-# スプライトエンジン拡張（SPRX）と SPRJ リソース
+# SPRX（このフォークのメインのスプライト）と SPRJ リソース
 
-このフォーク独自の拡張です（本家 SGDK にはありません）。
+このフォーク独自の機能です（本家 SGDK にはありません）。V1 からは拡張ではなく、標準のスプライトエンジンに組み込んだメインのスプライトの道です。
 JSON 形式のスプライトデータ（パーツ / コマ / アニメ / 当たり矩形）を、rescomp-cs の `SPRJ` リソースで変換し、
 拡張したスプライトエンジンで表示します。
 
@@ -61,7 +61,8 @@ extern const SprxInfo name;
 
 ## 実行時の使い方
 
-`MODULE_SPRITE_EXT`（`inc/config.h`、既定 1）が有効なら `genesis.h` から `ext/sprite_eng_ext.h` が読まれます。
+`genesis.h` から `sprx.h` がいつも読まれます（標準のスプライトエンジンを使っているとき。`LEGACY_SPRITE_ENGINE` を 1 にした古いエンジンでは使えません）。
+以前の `ext/sprite_eng_ext.h` も、`sprx.h` を読むだけのファイルとして残してあります。
 
 ### RESIDENT（同じ絵を何体も出すもの）
 
@@ -118,22 +119,38 @@ if (SPRX_getBox(spr, SPRX_KIND_HIT, 0, &r))   // 基準点からの相対。ス�
 - RESIDENT のコマの `tileset` はタイル 0 枚（転送しない）、TRANSFER のコマの `tileset` はそのコマで使うパーツのタイル（同じパーツは 1 回だけ）です。
 - 当たり矩形は `AnimationFrame.collision` に `SprxBoxList*` として入れてあります（エンジンはこの欄を使っていません）。
 
-## 本家の更新を取り込むとき
+## ファイルの場所（V1）
 
-本家のファイルへの変更は次の 4 か所だけで、すべて `[EXT] SPRX` の目印コメントが付いています（`git grep "\[EXT\] SPRX"` で探せます）。
-
-| ファイル | 変更 |
+| ファイル | 内容 |
 |---|---|
-| `inc/config.h` | `MODULE_SPRITE_EXT` |
-| `inc/genesis.h` | `ext/sprite_eng_ext.h` の include |
+| `inc/sprx.h` | SPRX の API（以前の `inc/ext/sprite_eng_ext.h`） |
+| `src/mw/sprite/sprx.c` | SPRX の実行時の処理（以前の `src/ext/sprite_eng_ext.c`） |
+| `src/mw/sprite/sprite_eng.c` | 標準のスプライトエンジン。`SPR_update()` の SAT を作る部分で拡張コマなら `SPRX_fillVDPSprites` を呼ぶ |
+| `inc/mw/sprite_port.h`, `src/mw/sprite/sprite_port.c` | スプライトエンジンのポート。`SPR_update()` だけは実行中に差し替えられる（`SPR_setEnginePort`） |
 | `inc/sprite_eng.h` | `SPR_FLAG_EXT_FRAME`（0x0080）と `SPR_FLAG_MASK` への追加 |
-| `src/sprite_eng.c` | include と、`SPR_update()` の SAT を作る部分の分岐（`SPRX_fillVDPSprites` を呼ぶ） |
+| `inc/config.h` | `MODULE_SPRITE_EXT`（互換のため残した。`LEGACY_SPRITE_ENGINE == 0` のとき 1） |
 
 本家が `SPR_update()` の SAT 作成部分、`FrameVDPSprite`、`AnimationFrame`、`Sprite` の status ビットを変えたときは、
-`src/ext/sprite_eng_ext.c` の `SPRX_fillVDPSprites()` と rescomp-cs の `SprxFrameRes` を合わせて直してください。
-`MODULE_SPRITE_EXT` を 0 にすると、本家と同じ動きになります。
+`src/mw/sprite/sprx.c` の `SPRX_fillVDPSprites()` と rescomp-cs の `SprxFrameRes` を合わせて直してください。
+本家の `SPR_update()` は、このフォークでは `SPR_updateDefault()` という名前になっています（`SPR_update()` はポートを通して呼びます）。
+
+### スプライトエンジンを差し替える
+
+```c
+static void myUpdate(void)
+{
+    // 自前の処理 ...
+    SPR_updateDefault();        // 標準のエンジンも使うなら呼ぶ
+}
+static const SpriteEnginePort myPort = { "mine", myUpdate };
+
+SPR_setEnginePort(&myPort);     // NULL で標準 (sprEnginePortDefault) に戻る
+```
+
+差し替えられるのは 1 フレームに 1 回呼ぶ `SPR_update()` だけです（関数ポインタ 1 回分、約 16 サイクル）。
+`SPR_setPosition()` などの個々の関数は差し替えず、直接呼びます（計画書の R11: 個々の関数を関数ポインタにすると遅くなるため）。
 
 ## テスト
 
-`tools/rescomp-cs/tests/sprj/run_test.sh`（Linux）で、変換結果と `sprite_eng_ext.c` を m68k 向けにビルドし、qemu-m68k で動かして確認します。
+`tools/rescomp-cs/tests/sprj/run_test.sh`（Linux）で、変換結果と `src/mw/sprite/sprx.c` を m68k 向けにビルドし、qemu-m68k で動かして確認します。
 必要なもの: dotnet 8 SDK、`m68k-linux-gnu-gcc`、`qemu-m68k`（Ubuntu なら `dotnet-sdk-8.0 gcc-m68k-linux-gnu qemu-user`）。

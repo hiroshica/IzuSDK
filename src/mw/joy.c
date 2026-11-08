@@ -10,6 +10,8 @@
 #include "tools.h"
 #include "z80_ctrl.h"
 
+#include "hal/hal_io.h"   // [V1] controller ports through the I/O HAL
+
 
 #define JOY_TYPE_SHIFT          12
 
@@ -71,25 +73,25 @@ NO_INLINE void JOY_reset()
     Z80_STATE_SAVE
 
     /* check for EA 4-Way Play */
-    pb = (vu8 *)0xa10009;
+    pb = hal_io_ctrl_ptr(PORT_1);
     *pb = 0x40;
-    pb = (vu8 *)0xa1000b;
+    pb = hal_io_ctrl_ptr(PORT_2);
     *pb = 0x7F;
-    pb = (vu8 *)0xa10003;
+    pb = hal_io_data_ptr(PORT_1);
     *pb = 0x40;
 
-    pb = (vu8 *)0xa10005;
+    pb = hal_io_data_ptr(PORT_2);
     *pb = 0x0C;
     asm volatile ("nop");
     asm volatile ("nop");
-    pb = (vu8 *)0xa10003;
+    pb = hal_io_data_ptr(PORT_1);
     a = *pb & 3;
 
-    pb = (vu8 *)0xa10005;
+    pb = hal_io_data_ptr(PORT_2);
     *pb = 0x7C;
     asm volatile ("nop");
     asm volatile ("nop");
-    pb = (vu8 *)0xa10003;
+    pb = hal_io_data_ptr(PORT_1);
     b = *pb & 3;
 
     Z80_STATE_RESTORE
@@ -121,14 +123,14 @@ NO_INLINE void JOY_reset()
         Z80_STATE_SAVE
 
         /* set the port bits direction */
-        pb = (vu8 *)0xa10009;
+        pb = hal_io_ctrl_ptr(PORT_1);
         *pb = 0x40;
         pb += 2;
         *pb = 0x40;
         pb += 2;
         *pb = 0x40;
         /* set the port bits value */
-        pb = (vu8 *)0xa10003;
+        pb = hal_io_data_ptr(PORT_1);
         *pb = 0x40;
         pb += 2;
         *pb = 0x40;
@@ -144,7 +146,7 @@ NO_INLINE void JOY_reset()
         Z80_STATE_SAVE
 
         /* get ID port 1 */
-        pb = (vu8 *)0xa10003;
+        pb = hal_io_data_ptr(PORT_1);
         a = *pb;
         *pb = 0x00;
         id = (a & 8) | (a & 4) ? 8 : 0;
@@ -156,7 +158,7 @@ NO_INLINE void JOY_reset()
         portType[PORT_1] = id;
 
         /* get ID port 2 */
-        pb = (vu8 *)0xa10005;
+        pb = hal_io_data_ptr(PORT_2);
         a = *pb;
         *pb = 0x00;
         id = (a & 8) | (a & 4) ? 8 : 0;
@@ -188,18 +190,18 @@ NO_INLINE void JOY_reset()
             case PORT_TYPE_MENACER:
             case PORT_TYPE_JUSTIFIER:
                 /* init port for light gun control */
-                pb = (vu8 *)0xa10009;
+                pb = hal_io_ctrl_ptr(PORT_1);
                 *pb = 0x30;
-                pb = (vu8 *)0xa10003;
+                pb = hal_io_data_ptr(PORT_1);
                 *pb = 0x30;
                 break;
 
             case PORT_TYPE_MOUSE:
             case PORT_TYPE_TEAMPLAYER:
                 /* init port for Three Line Handshake Method */
-                pb = (vu8 *)0xa10009;
+                pb = hal_io_ctrl_ptr(PORT_1);
                 *pb = 0x60;
-                pb = (vu8 *)0xa10003;
+                pb = hal_io_data_ptr(PORT_1);
                 *pb = 0x60;
                 break;
 
@@ -213,18 +215,18 @@ NO_INLINE void JOY_reset()
             case PORT_TYPE_MENACER:
             case PORT_TYPE_JUSTIFIER:
                 /* init port for light gun control */
-                pb = (vu8 *)0xa1000b;
+                pb = hal_io_ctrl_ptr(PORT_2);
                 *pb = 0x30;
-                pb = (vu8 *)0xa10005;
+                pb = hal_io_data_ptr(PORT_2);
                 *pb = 0x30;
                 break;
 
             case PORT_TYPE_MOUSE:
             case PORT_TYPE_TEAMPLAYER:
                 /* init port for Three Line Handshake Method */
-                pb = (vu8 *)0xa1000b;
+                pb = hal_io_ctrl_ptr(PORT_2);
                 *pb = 0x60;
-                pb = (vu8 *)0xa10005;
+                pb = hal_io_data_ptr(PORT_2);
                 *pb = 0x60;
                 break;
 
@@ -289,7 +291,7 @@ static void externalIntCB()
 
     Z80_STATE_SAVE
 
-    pb = (vu8 *)0xa10003 + (gport * 2);
+    pb = hal_io_data_ptr(gport);
     if (portType[gport] == PORT_TYPE_JUSTIFIER)
         *pb = gun | 0x10;                   /* deselect gun */
 
@@ -351,7 +353,7 @@ NO_INLINE void JOY_setSupport(u16 port, u16 support)
 
                 Z80_STATE_SAVE
 
-                pb = (vu8 *)0xa10009 + port*2;
+                pb = hal_io_ctrl_ptr(port);
                 *pb = 0xB0;                     /* enable TH->HL */
 
                 Z80_STATE_RESTORE
@@ -375,7 +377,7 @@ NO_INLINE void JOY_setSupport(u16 port, u16 support)
 
                 Z80_STATE_SAVE
 
-                pb = (vu8 *)0xa10009 + port*2;
+                pb = hal_io_ctrl_ptr(port);
                 *pb = 0x30;                         /* disable TH->HL */
 
                 Z80_STATE_RESTORE
@@ -418,9 +420,9 @@ NO_INLINE void JOY_setSupport(u16 port, u16 support)
              */
             Z80_STATE_SAVE
 
-            pb = (vu8 *)0xa10009 + port*2;
+            pb = hal_io_ctrl_ptr(port);
             *pb = 0x40;
-            pb = (vu8 *)0xa10003 + port*2;
+            pb = hal_io_data_ptr(port);
             *pb = 0x40;
 
             Z80_STATE_RESTORE
@@ -453,7 +455,7 @@ NO_INLINE void JOY_setSupport(u16 port, u16 support)
 
                 Z80_STATE_SAVE
 
-                pb = (vu8 *)0xa10009 + port*2;
+                pb = hal_io_ctrl_ptr(port);
                 *pb = 0x80;                     /* enable TH->HL */
 
                 Z80_STATE_RESTORE
@@ -477,7 +479,7 @@ NO_INLINE void JOY_setSupport(u16 port, u16 support)
 
                 Z80_STATE_SAVE
 
-                pb = (vu8 *)0xa10009 + port*2;
+                pb = hal_io_ctrl_ptr(port);
                 *pb = 0x40;                         /* disable TH->HL */
 
                 Z80_STATE_RESTORE
@@ -677,7 +679,7 @@ static u16 read3Btn(u16 port)
     u16 val;
     Z80_STATE_DECL
 
-    pb = (vu8 *)0xa10003 + port*2;
+    pb = hal_io_data_ptr(port);
 
     Z80_STATE_SAVE
     val = TH_CONTROL_PHASE(pb);                   /* - 0 s a 0 0 d u - 1 c b r l d u */
@@ -695,7 +697,7 @@ static u16 read6Btn(u16 port)
     u16 val, v1, v2;
     Z80_STATE_DECL
 
-    pb = (vu8 *)0xa10003 + port*2;
+    pb = hal_io_data_ptr(port);
 
     Z80_STATE_SAVE
     v1 = TH_CONTROL_PHASE(pb);                    /* - 0 s a 0 0 d u - 1 c b r l d u */
@@ -730,11 +732,11 @@ static s16 start3lhs(u16 port, u8 *hdr, u16 len)
     Z80_STATE_SAVE
 
     /* make sure port direction is correct */
-    pb = (vu8 *)0xa10009 + port*2;
+    pb = hal_io_ctrl_ptr(port);
     *pb = 0x60;
 
     /* make sure port is deselected to start at first phase */
-    pb = (vu8 *)0xa10003 + port*2;
+    pb = hal_io_data_ptr(port);
     *pb = 0x60;
     asm volatile ("nop");
     asm volatile ("nop");
@@ -777,7 +779,7 @@ static u16 readMouse(u16 port)
     u8 hdr[4], md[6];
     Z80_STATE_DECL
 
-    pb = (vu8 *)0xa10003 + port*2;
+    pb = hal_io_data_ptr(port);
     val = (JOY_TYPE_MOUSE << JOY_TYPE_SHIFT);
 
     sts = start3lhs(port, hdr, 4);
@@ -857,7 +859,7 @@ static void readTeamPlayer(u16 port)
     const u16 *xlt_port = xlt_all[port];
     Z80_STATE_DECL
 
-    pb = (vu8 *)0xa10003 + port*2;
+    pb = hal_io_data_ptr(port);
 
     sts = start3lhs(port, hdr, 8);
 
@@ -975,13 +977,13 @@ static void readEa4WayPlay()
 
     for (i=0; i<4; i++)
     {
-        pb = (vu8 *)0xa10005;
+        pb = hal_io_data_ptr(PORT_2);
 
         Z80_STATE_SAVE
 
         *pb = (i<<4) | 0x0C;                          /* select port i */
 
-        pb = (vu8 *)0xa10003;
+        pb = hal_io_data_ptr(PORT_1);
         v1 = TH_CONTROL_PHASE(pb);                    /* - 0 s a 0 0 d u - 1 c b r l d u */
 
         if (v1 & 0x0C00)
@@ -994,7 +996,7 @@ static void readEa4WayPlay()
         v2 = TH_CONTROL_PHASE(pb);                    /* - 0 s a 0 0 0 0 - 1 c b m x y z */
         val = TH_CONTROL_PHASE(pb);                   /* - 0 s a 1 1 1 1 - 1 c b r l d u */
 
-        pb = (vu8 *)0xa10005;
+        pb = hal_io_data_ptr(PORT_2);
         *pb = 0x7C;                                   /* deselect port */
 
         Z80_STATE_RESTORE
@@ -1031,7 +1033,7 @@ static void readLightgun(u16 port)
     u32 tmp;
     Z80_STATE_DECL
 
-    pb = (vu8 *)0xa10003 + port*2;
+    pb = hal_io_data_ptr(port);
     if (portType[port] == PORT_TYPE_JUSTIFIER)
     {
         Z80_STATE_SAVE
@@ -1179,7 +1181,7 @@ static u16 readTrackball(u16 port)
     u32 tmp;
     Z80_STATE_DECL
 
-    pb = (vu8 *)0xa10003 + port*2;
+    pb = hal_io_data_ptr(port);
     val = (JOY_TYPE_TRACKBALL << JOY_TYPE_SHIFT);
 
     Z80_STATE_SAVE

@@ -1,11 +1,11 @@
-// [EXT] SPRX: host-side test of the SPRJ output + sprite_eng_ext.c, run with qemu-m68k (see run_test.sh).
-// Links the rescomp-cs output (test.s) and src/ext/sprite_eng_ext.c with small stubs for the SGDK functions it calls.
+// [EXT] SPRX: host-side test of the SPRJ output + src/mw/sprite/sprx.c, run with qemu-m68k (see run_test.sh).
+// Links the rescomp-cs output (test.s) and src/mw/sprite/sprx.c with small stubs for the SGDK functions it calls.
 
 #include "test.h"
 
 int printf(const char* fmt, ...);
 
-// ---- stubs for SGDK functions used by sprite_eng_ext.c ----
+// ---- stubs for SGDK functions used by sprx.c ----
 static Sprite stubSprite;
 Sprite* SPR_addSpriteEx(const SpriteDefinition* def, s16 x, s16 y, u16 attr, u16 flag)
 {

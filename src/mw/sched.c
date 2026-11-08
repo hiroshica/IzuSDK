@@ -19,16 +19,9 @@
 extern VoidCallback *vblankCB;
 extern vu16 VBlankProcess;
 // frame load display (sys.c)
+extern u16 sysFlags;
 extern void SYS_doFrameLoadDisplay(void);
-
-// VBlankProcess bit of each task slot (0 = always run)
-static const u16 taskBits[SCHED_TASK_NUM] =
-{
-    PROCESS_DMA_TASK,
-    PROCESS_VDP_SCROLL_TASK,
-    PROCESS_PALETTE_FADING,
-    0
-};
+#define SHOW_FRAME_LOAD             (1 << 0)
 
 static SchedTask* tasks[SCHED_TASK_NUM];
 static VoidCallback* events[SCHED_EVENT_NUM];
@@ -68,20 +61,6 @@ void SCHED_fireEvent(u16 event)
 }
 
 
-// run task of given slot if registered and its process bit is set, returns updated process bits
-static u16 runTask(u16 slot, u16 vbp)
-{
-    SchedTask* task = tasks[slot];
-    const u16 bit = taskBits[slot];
-
-    if (task && (!bit || (vbp & bit)))
-    {
-        if (!task() && bit) vbp &= ~bit;
-    }
-
-    return vbp;
-}
-
 #if (LIB_LOG_LEVEL >= LOG_LEVEL_WARNING)
 static void checkOverrun(u16 slot, u16 dmaSize)
 {
@@ -106,8 +85,6 @@ bool SYS_doVBlankProcess()
 
 NO_INLINE bool SYS_doVBlankProcessEx(VBlankProcessTime processTime)
 {
-    u16 slot;
-
     if (processTime != IMMEDIATELY)
     {
         // wait for VBlank
@@ -126,19 +103,32 @@ NO_INLINE bool SYS_doVBlankProcessEx(VBlankProcessTime processTime)
     }
 
     u16 vbp = VBlankProcess;
+    SchedTask* task;
 
-    // DMA, scroll and palette tasks (in this order)
-    for (slot = SCHED_TASK_DMA; slot <= SCHED_TASK_PALETTE; slot++)
+    // DMA, scroll and palette tasks (in this order). Written out (no loop / helper call): this runs every frame
+    // and SurugaCC does not inline functions.
+    if ((vbp & PROCESS_DMA_TASK) && (task = tasks[SCHED_TASK_DMA]))
     {
 #if (LIB_LOG_LEVEL >= LOG_LEVEL_WARNING)
-        const u16 dmaSize = (slot == SCHED_TASK_DMA)?DMA_getQueueTransferSize():0;
-        const bool run = (tasks[slot] != NULL) && (vbp & taskBits[slot]);
+        const u16 dmaSize = DMA_getQueueTransferSize();
 #endif
-
-        vbp = runTask(slot, vbp);
-
+        if (!task()) vbp &= ~PROCESS_DMA_TASK;
 #if (LIB_LOG_LEVEL >= LOG_LEVEL_WARNING)
-        if (run) checkOverrun(slot, dmaSize);
+        checkOverrun(SCHED_TASK_DMA, dmaSize);
+#endif
+    }
+    if ((vbp & PROCESS_VDP_SCROLL_TASK) && (task = tasks[SCHED_TASK_SCROLL]))
+    {
+        if (!task()) vbp &= ~PROCESS_VDP_SCROLL_TASK;
+#if (LIB_LOG_LEVEL >= LOG_LEVEL_WARNING)
+        checkOverrun(SCHED_TASK_SCROLL, 0);
+#endif
+    }
+    if ((vbp & PROCESS_PALETTE_FADING) && (task = tasks[SCHED_TASK_PALETTE]))
+    {
+        if (!task()) vbp &= ~PROCESS_PALETTE_FADING;
+#if (LIB_LOG_LEVEL >= LOG_LEVEL_WARNING)
+        checkOverrun(SCHED_TASK_PALETTE, 0);
 #endif
     }
 
@@ -149,10 +139,10 @@ NO_INLINE bool SYS_doVBlankProcessEx(VBlankProcessTime processTime)
     (*vblankCB)();
 
     // frame load display
-    SYS_doFrameLoadDisplay();
+    if (sysFlags & SHOW_FRAME_LOAD) SYS_doFrameLoadDisplay();
 
     // joy state refresh (and any 'always' task after the user callback)
-    runTask(SCHED_TASK_JOY, 0);
+    if ((task = tasks[SCHED_TASK_JOY])) task();
 
     return TRUE;
 }

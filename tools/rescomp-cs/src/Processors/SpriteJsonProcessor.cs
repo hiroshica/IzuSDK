@@ -4,7 +4,7 @@ using Sgdk.Rescomp.Types;
 
 namespace Sgdk.Rescomp.Processors;
 
-// [EXT] SPRX: JSON sprite resource (extended frames, see inc/ext/sprite_eng_ext.h).
+// [EXT] SPRX: JSON sprite resource (extended frames, see inc/sprx.h).
 
 public sealed class SpriteJsonProcessor : IProcessor
 {

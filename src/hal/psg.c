@@ -3,7 +3,8 @@
 
 #include "psg.h"
 
-#include "vdp.h"
+#include "hal/hal_vdp.h"
+
 
 
 void PSG_reset()
@@ -65,7 +66,7 @@ void PSG_setFrequency(u8 channel, u16 value)
     if (value)
     {
         // frequency to tone conversion
-        if (IS_PAL_SYSTEM) data = 3546893 / (value * 32);
+        if (hal_vdp_is_pal()) data = 3546893 / (value * 32);
         else data = 3579545 / (value * 32);
     }
     else data = 0;

@@ -83,10 +83,9 @@
 #include "ext/link_cable.h"
 #endif
 
-// [EXT] SPRX
-#if (MODULE_SPRITE_EXT != 0)
-#include "ext/sprite_eng_ext.h"
-#endif
+// [V1] SPRX: main sprite path (extended frames / SPRJ resource) and sprite engine port
+#include "sprx.h"
+#include "mw/sprite_port.h"
 
 // preserve compatibility with old resources name
 #define logo_lib sgdk_logo

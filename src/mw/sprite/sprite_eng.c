@@ -18,11 +18,10 @@
 #include "kdebug.h"
 #include "string.h"
 #include "timer.h"
-// [EXT] SPRX
-#if (MODULE_SPRITE_EXT != 0)
-#include "ext/sprite_eng_ext.h"
+// [V1] SPRX (main sprite path) and scheduler events
+#include "sprx.h"
 #include "mw/sched.h"
-#endif
+#include "mw/sprite_port.h"
 
 
 //#define SPR_DEBUG
@@ -1568,7 +1567,8 @@ void SPR_clear()
     END_PROFIL(PROFIL_CLEAR)
 }
 
-NO_INLINE void SPR_update()
+// [V1] default update of the sprite engine port (SPR_update() dispatches here unless SPR_setEnginePort(..) set another one)
+NO_INLINE void SPR_updateDefault()
 {
     START_PROFIL
 
@@ -1639,13 +1639,10 @@ NO_INLINE void SPR_update()
             u16 attr = sprite->attribut;
             s8 numSprite = frame->numSprite;
 
-// [EXT] SPRX begin: extended frame (per VDP sprite tile / flip / palette)
-#if (MODULE_SPRITE_EXT != 0)
+// [V1] SPRX: extended frame (per VDP sprite tile / flip / palette)
             if (status & SPR_FLAG_EXT_FRAME)
                 vdpSprite = SPRX_fillVDPSprites(sprite, vdpSprite, &vdpSpriteInd);
             else
-#endif
-// [EXT] SPRX end
             // special case of single VDP sprite with size aligned to sprite size (no offset, no flip calculation required)
             if (numSprite < 0)
             {

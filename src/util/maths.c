@@ -1,11 +1,10 @@
 #include "config.h"
 #include "types.h"
-#include "sys.h"
+#include "sys.h"     // FORCE_INLINE / NO_INLINE attribute macros
 
 #include "maths.h"
 
 #include "tab_cnv.h"
-#include "vdp.h"
 
 
 const fix16 trigtab_f16[90 + 1] =
