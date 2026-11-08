@@ -1,6 +1,11 @@
 #ifndef _GENESIS_H_
 #define _GENESIS_H_
 
+// IsuSDK (ISDK): derived from SGDK by Stephane Dallongeville (https://github.com/Stephane-D/SGDK)
+#define ISDK_VERSION    1.0
+#define ISDK            TRUE
+
+// SGDK compatibility: base SGDK version, kept so that existing code checking SGDK / SGDK_VERSION still builds
 #define SGDK_VERSION    2.12
 
 #include "types.h"

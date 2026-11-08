@@ -1,4 +1,4 @@
-namespace Sgdk.Xgm2Tool;
+namespace Isdk.Xgm2Tool;
 
 /// <summary>xgm2tool のコマンドライン版 (Java 版の Launcher。GUI は移していない)。</summary>
 public static class Launcher

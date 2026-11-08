@@ -1,5 +1,5 @@
 using System.Text;
-namespace Sgdk.Xgm2Tool;
+namespace Isdk.Xgm2Tool;
 
 
 

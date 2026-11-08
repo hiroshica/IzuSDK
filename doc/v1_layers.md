@@ -1,6 +1,6 @@
-# V1: HAL / ミドルウェアの層に分けた SGDK（このフォーク）
+# V1: HAL / ミドルウェアの層に分けた IsuSDK
 
-計画書「SGDK 階層調査・HAL/ミドルウェア再構築 設計書」の v1（階層調査・HAL/MW 層分割・低速リスク・ASM 見積）を、このフォークに実装したときの説明です。
+計画書「SGDK 階層調査・HAL/ミドルウェア再構築 設計書」の v1（階層調査・HAL/MW 層分割・低速リスク・ASM 見積）を、IsuSDK（当時は SGDK のフォーク）に実装したときの説明です。
 v2 の C++ namespace 化は含みません（下の「計画書と変えたところ」を参照）。
 
 ## 層とフォルダ
@@ -150,7 +150,7 @@ SurugaCC（-O2）で `sample/game/sonic` を `run68k.py --profile` で 180 フ�
 - `COPYING.RUNTIME`: `bin/libgcc_s_dw2-1.dll` を配るためのライセンス（GCC の実行時ライブラリ例外）
 - `inc/config.h` の `LEGACY_ERROR_HANDLER` と `LEGACY_FONT_LOCATION`: 今も選べる設定（`LEGACY_FONT_LOCATION` は 1 で使っている）
 - ヘッダーの `_Pragma("GCC error ...")`: 使わなくなった API の名前を使ったときにエラーで知らせるための目印。ふだんのビルドには関係しない
-- `setup.bat`, `memo.md`, `SGDK.code-workspace`: このフォークで足したもの
+- `setup.bat`, `memo.md`, `IsuSDK.code-workspace`（以前の `SGDK.code-workspace`）: このフォークで足したもの
 
 ## 本家のファイルとの対応
 

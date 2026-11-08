@@ -1,7 +1,7 @@
 using System.Xml;
-using Sgdk.Rescomp.Resources;
+using Isdk.Rescomp.Resources;
 
-namespace Sgdk.Rescomp.Types;
+namespace Isdk.Rescomp.Types;
 
 /// <summary>Tiled の XML を読むための小物 (Java 版の XMLUtil の使っている分だけ)。</summary>
 static class Xml

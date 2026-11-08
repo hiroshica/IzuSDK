@@ -1,4 +1,4 @@
-namespace Sgdk.Rescomp.Types;
+namespace Isdk.Rescomp.Types;
 
 /// <summary>
 /// java.awt.Rectangle と同じ計算をする矩形 (交差で幅や高さが負になるところまで同じ)。

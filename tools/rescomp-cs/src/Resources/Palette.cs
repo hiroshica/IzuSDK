@@ -1,7 +1,7 @@
 using System.Text;
-using Sgdk.Rescomp.Imaging;
+using Isdk.Rescomp.Imaging;
 
-namespace Sgdk.Rescomp.Resources;
+namespace Isdk.Rescomp.Resources;
 
 /// <summary>パレット (Java 版の resource.Palette)。</summary>
 public sealed class Palette : Resource

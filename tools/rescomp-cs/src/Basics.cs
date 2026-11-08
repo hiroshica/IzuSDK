@@ -1,4 +1,4 @@
-namespace Sgdk.Rescomp;
+namespace Isdk.Rescomp;
 
 public enum SoundDriver { PCM, DPCM2, PCM4, XGM, XGM2 }
 

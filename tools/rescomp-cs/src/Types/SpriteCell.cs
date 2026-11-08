@@ -1,6 +1,6 @@
-using Sgdk.Rescomp.Imaging;
+using Isdk.Rescomp.Imaging;
 
-namespace Sgdk.Rescomp.Types;
+namespace Isdk.Rescomp.Types;
 
 public enum OptimizationType { BALANCED, MIN_SPRITE, MIN_TILE, NONE }
 

@@ -1,6 +1,6 @@
 /**
  *  \file vram.h
- *  \brief SGDK VRAM (Video Memory) management unit
+ *  \brief ISDK VRAM (Video Memory) management unit
  *  \author Stephane Dallongeville
  *  \date 11/2015
  *

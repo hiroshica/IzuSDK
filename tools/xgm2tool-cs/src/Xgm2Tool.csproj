@@ -4,7 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <AssemblyName>xgm2tool</AssemblyName>
-    <RootNamespace>Sgdk.Xgm2Tool</RootNamespace>
+    <RootNamespace>Isdk.Xgm2Tool</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <InvariantGlobalization>true</InvariantGlobalization>

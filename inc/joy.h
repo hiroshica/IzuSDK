@@ -21,13 +21,13 @@
  *
  * Although Sega Master System pad, trackball, and Phaser are supported, they aren't automatically detected on JOY_init().<br>
  * Another caveat is that although the Menacer and Justifier are automatically recognized and supported, the support is not enabled
- * until the programmer tells it to because of the extra overhead that lightguns add. This way, SGDK defaults to a lower overhead state for controllers.
+ * until the programmer tells it to because of the extra overhead that lightguns add. This way, ISDK defaults to a lower overhead state for controllers.
  * Games that can use lightguns can check and enable the lightgun as part of the init process, while normal games
  * can ignore that and simply count on the default init state for controllers.<br>
  * Note that mice are enabled by default by JOY_init() and will return emulated pad values for reading the port as if it were a controller.<br>
- * This allows using a mouse as a pad for SGDK games. However, mice use a little more overhead than pads, so a game that doesn't use mice
+ * This allows using a mouse as a pad for ISDK games. However, mice use a little more overhead than pads, so a game that doesn't use mice
  * as mice and wants every last scrap of speed should check if mice are connected and turn them off to get just that extra little bit of speed.<br>
- * If you have an existing SGDK based game that needs every last bit of speed and doesn't check for mice, unplug any mice for extra speed. Mice are only enabled if detected.
+ * If you have an existing ISDK based game that needs every last bit of speed and doesn't check for mice, unplug any mice for extra speed. Mice are only enabled if detected.
  */
 
 #ifndef _JOY_H_
@@ -145,7 +145,7 @@ typedef void JoyEventCallback(u16 joy, u16 changed, u16 state);
  *      Initialize the controller sub system.<br>
  *
  *      Software and hardware controller port initialization (reset and devices detection).<br>
- *      Automatically called at SGDK initialization, no need to call it manually.
+ *      Automatically called at ISDK initialization, no need to call it manually.
  */
 void JOY_init(void);
 
@@ -154,7 +154,7 @@ void JOY_init(void);
  *      Reset the controller sub system.<br>
  *
  *      It will reset the controller port state and perform device detectionSoftware and hardware controller port initialization.<br>
- *      Automatically called at SGDK initialization, no need to call it manually.
+ *      Automatically called at ISDK initialization, no need to call it manually.
  */
 void JOY_reset(void);
 
@@ -162,7 +162,7 @@ void JOY_reset(void);
  *  \brief
  *      Returns the current set callback function for controller state change.<br>
  *<br>
- *      SGDK provides an event system to detect state change on controller.<br>
+ *      ISDK provides an event system to detect state change on controller.<br>
  *      It internally updates controllers state at each V Blank period and fire an event if a state change is detected.<br>
  *
  *  \return
@@ -173,7 +173,7 @@ JoyEventCallback* JOY_getEventHandler();
  *  \brief
  *      Set the callback function for controller state changed.<br>
  *<br>
- *      SGDK provides an event system to detect state change on controller.<br>
+ *      ISDK provides an event system to detect state change on controller.<br>
  *      It internally updates controllers state at each V Blank period and fire an event if a state change is detected.<br>
  *
  *  \param CB

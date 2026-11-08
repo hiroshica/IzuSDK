@@ -10,8 +10,8 @@
  * This sound driver allow Single PCM channel 8 bits signed sample driver.<br>
  * It can play a sample (8 bit signed) from 8 Khz up to 32 Khz rate.<br>
  *<br>
- * Note that SGDK sound drivers may not fit your needs so it's important to know<br>
- * that some alternatives sound drivers exist (see SGDK readme.md for more info)
+ * Note that ISDK sound drivers may not fit your needs so it's important to know<br>
+ * that some alternatives sound drivers exist (see upstream SGDK readme.md for more info)
  */
 
 #ifndef _SND_PCM_H_
@@ -65,10 +65,10 @@ bool SND_PCM_isPlaying(void);
  *
  *  \param sample
  *      Sample address, should be 256 bytes boundary aligned<br>
- *      SGDK automatically align resource as needed
+ *      ISDK automatically align resource as needed
  *  \param len
  *      Size of sample in bytes, should be a multiple of 256<br>
- *      SGDK automatically adjust resource size as needed
+ *      ISDK automatically adjust resource size as needed
  *  \param rate
  *      Playback rate :<br>
  *      SOUND_PCM_RATE_32000 = 32 Khz (best quality but take lot of rom space)<br>

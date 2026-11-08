@@ -1,4 +1,4 @@
-namespace Sgdk.Rescomp.Sound;
+namespace Isdk.Rescomp.Sound;
 
 /// <summary>
 /// rescomp.jar が WAV を読むときに使う Java Sound (javax.sound.sampled) の変換を、同じ結果になるように移したもの。

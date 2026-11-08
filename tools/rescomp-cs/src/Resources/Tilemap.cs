@@ -1,8 +1,8 @@
 using System.Text;
-using Sgdk.Rescomp.Imaging;
-using Sgdk.Rescomp.Types;
+using Isdk.Rescomp.Imaging;
+using Isdk.Rescomp.Types;
 
-namespace Sgdk.Rescomp.Resources;
+namespace Isdk.Rescomp.Resources;
 
 /// <summary>タイルマップ (Java 版の resource.Tilemap)。</summary>
 public sealed class Tilemap : Resource

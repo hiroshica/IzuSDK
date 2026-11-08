@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace Sgdk.Rescomp;
+namespace Isdk.Rescomp;
 
 /// <summary>
 /// rescomp.jar と同じ出力にするための、Java の振る舞いの写し (SGDK の tools/commons の StringUtil・FileUtil など)。

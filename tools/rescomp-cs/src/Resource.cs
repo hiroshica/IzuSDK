@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace Sgdk.Rescomp;
+namespace Isdk.Rescomp;
 
 /// <summary>
 /// リソース (Java 版の sgdk.rescomp.Resource)。同じ中身のリソースは 1 つにまとめるので、

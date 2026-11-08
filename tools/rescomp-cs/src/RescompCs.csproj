@@ -4,7 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <AssemblyName>rescomp</AssemblyName>
-    <RootNamespace>Sgdk.Rescomp</RootNamespace>
+    <RootNamespace>Isdk.Rescomp</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <InvariantGlobalization>true</InvariantGlobalization>

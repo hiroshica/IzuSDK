@@ -1,7 +1,7 @@
 using System.Text;
-using Sgdk.Rescomp.Imaging;
+using Isdk.Rescomp.Imaging;
 
-namespace Sgdk.Rescomp.Resources;
+namespace Isdk.Rescomp.Resources;
 
 /// <summary>4bpp のビットマップ (Java 版の resource.Bitmap)。</summary>
 public sealed class Bitmap : Resource

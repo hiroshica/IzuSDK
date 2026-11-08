@@ -12,8 +12,8 @@
  * Address and size of samples have to be 256 bytes boundary.<br>
  * The driver does support "cutoff" when mixing so you can use true 8 bits samples :)<br>
  *<br>
- * Note that SGDK sound drivers may not fit your needs so it's important to know<br>
- * that some alternatives sound drivers exist (see SGDK readme.md for more info)
+ * Note that ISDK sound drivers may not fit your needs so it's important to know<br>
+ * that some alternatives sound drivers exist (see upstream SGDK readme.md for more info)
  */
 
 #ifndef _SND_PCM4_H_
@@ -63,10 +63,10 @@ bool SND_PCM4_isPlaying(const u16 channel_mask);
  *
  *  \param sample
  *      Sample address, should be 256 bytes boundary aligned<br>
- *      SGDK automatically align resource as needed
+ *      ISDK automatically align resource as needed
  *  \param len
  *      Size of sample in bytes, should be a multiple of 256<br>
- *      SGDK automatically adjust resource size as needed
+ *      ISDK automatically adjust resource size as needed
  *  \param channel
  *      Channel where we want to play sample, accepted values are:<br>
  *      SOUND_PCM_CH_AUTO  = auto selection from current channel usage<br>

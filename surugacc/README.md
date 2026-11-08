@@ -1,6 +1,6 @@
-# surugacc/ — SurugaCC でこの SGDK をビルドする
+# surugacc/ — SurugaCC で IsuSDK をビルドする
 
-このフォークのビルドは、自前の C# 製コンパイラ SurugaCC で行います (GCC・make は使いません)。
+IsuSDK のビルドは、自前の C# 製コンパイラ SurugaCC で行います (GCC・make は使いません)。
 このフォルダはそのための入口です。本家 SGDK の更新はもう取り込まないので、本家のファイルとの差は気にせず直してかまいません。
 
 ## 要るもの
@@ -30,7 +30,7 @@ pwsh surugacc/build.ps1 -g C:\work\mygame          # デバッグ情報つき
 pwsh surugacc/build.ps1 -LibOnly                   # ライブラリだけ
 ```
 
-- SGDK は既定でこのリポジトリを使う (`-Sgdk` で別の SGDK も指定できる)。
+- IsuSDK は既定でこのリポジトリを使う (`-Isdk` で別のフォルダも指定できる。旧名 `-Sgdk` も使える)。
 - できるもの: プロジェクトの `out/rom.bin` と `out/rom.out` (ELF)。
 - ライブラリの .o は `surugacc/out/lib-O2` などに置く。
 

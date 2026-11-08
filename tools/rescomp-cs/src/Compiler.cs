@@ -1,10 +1,10 @@
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using Sgdk.Rescomp.Processors;
-using Sgdk.Rescomp.Resources;
+using Isdk.Rescomp.Processors;
+using Isdk.Rescomp.Resources;
 
-namespace Sgdk.Rescomp;
+namespace Isdk.Rescomp;
 
 /// <summary>.res を読んで .s / .h / .d を作る (Java 版の sgdk.rescomp.Compiler)。</summary>
 public static class Compiler

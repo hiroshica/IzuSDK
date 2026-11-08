@@ -58,7 +58,7 @@ void hal_cpu_set_vint_task(VoidCallback* cb);
 
 /** \brief Disable all interrupts (SR = 0x2700), no save */
 #define hal_cpu_irq_disable()           __asm__ volatile ("move.w #0x2700,%%sr" ::: "cc")
-/** \brief Enable interrupts down to level 3 (SR = 0x2300, SGDK default), no restore */
+/** \brief Enable interrupts down to level 3 (SR = 0x2300, ISDK default), no restore */
 #define hal_cpu_irq_enable()            __asm__ volatile ("move.w #0x2300,%%sr" ::: "cc")
 
 /** \brief Interrupt mask level (0-7), see SYS_getInterruptMaskLevel() */

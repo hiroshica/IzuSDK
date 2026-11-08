@@ -1,6 +1,6 @@
-# SPRX（このフォークのメインのスプライト）と SPRJ リソース
+# SPRX（IsuSDK のメインのスプライト）と SPRJ リソース
 
-このフォーク独自の機能です（本家 SGDK にはありません）。V1 からは拡張ではなく、標準のスプライトエンジンに組み込んだメインのスプライトの道です。
+IsuSDK 独自の機能です（本家 SGDK にはありません）。V1 からは拡張ではなく、標準のスプライトエンジンに組み込んだメインのスプライトの道です。
 JSON 形式のスプライトデータ（パーツ / コマ / アニメ / 当たり矩形）を、rescomp-cs の `SPRJ` リソースで変換し、
 拡張したスプライトエンジンで表示します。
 
@@ -131,7 +131,7 @@ if (SPRX_getBox(spr, SPRX_KIND_HIT, 0, &r))   // 基準点からの相対。ス�
 
 `SPR_update()` の SAT 作成部分、`FrameVDPSprite`、`AnimationFrame`、`Sprite` の status ビットを変えるときは、
 `src/mw/sprite/sprx.c` の `SPRX_fillVDPSprites()` と rescomp-cs の `SprxFrameRes` を合わせて直してください。
-本家 SGDK の `SPR_update()` は、このフォークでは `SPR_updateDefault()` という名前になっています（`SPR_update()` はポートを通して呼びます）。
+本家 SGDK の `SPR_update()` は、IsuSDK では `SPR_updateDefault()` という名前になっています（`SPR_update()` はポートを通して呼びます）。
 
 ### スプライトエンジンを差し替える
 

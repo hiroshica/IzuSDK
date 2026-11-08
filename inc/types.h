@@ -4,7 +4,7 @@
  *  \author Stephane Dallongeville
  *  \date 08/2011
  *
- * SGDK Types definition.
+ * ISDK Types definition.
  */
 
 #ifndef _TYPES_H_

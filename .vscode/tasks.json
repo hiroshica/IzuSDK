@@ -4,7 +4,7 @@
     "tasks": [
         {
             "group": "build",
-            "label": "sgdk - build lib (SurugaCC)",
+            "label": "isdk - build lib (SurugaCC)",
             "type": "shell",
             "command": "pwsh",
             "args": ["-NoProfile", "-File", "${workspaceFolder}/surugacc/build.ps1", "-LibOnly"],
@@ -12,7 +12,7 @@
         },
         {
             "group": "build",
-            "label": "sgdk - build lib debug (SurugaCC)",
+            "label": "isdk - build lib debug (SurugaCC)",
             "type": "shell",
             "command": "pwsh",
             "args": ["-NoProfile", "-File", "${workspaceFolder}/surugacc/build.ps1", "-LibOnly", "-g"],

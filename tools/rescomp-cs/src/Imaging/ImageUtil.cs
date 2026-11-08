@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace Sgdk.Rescomp.Imaging;
+namespace Isdk.Rescomp.Imaging;
 
 /// <summary>Java 版の sgdk.tool.ImageUtil のうち、rescomp が使うもの。</summary>
 public static class ImageUtil

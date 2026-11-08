@@ -1,7 +1,7 @@
 using System.Text;
-using Sgdk.Rescomp.Imaging;
+using Isdk.Rescomp.Imaging;
 
-namespace Sgdk.Rescomp.Resources;
+namespace Isdk.Rescomp.Resources;
 
 /// <summary>タイルセット + タイルマップ + パレット (Java 版の resource.Image)。</summary>
 public sealed class Image : Resource

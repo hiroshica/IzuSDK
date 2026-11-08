@@ -152,10 +152,10 @@ u8 XGM2_isPlayingPCM(const u16 channel_mask);
  *
  *  \param sample
  *      Sample address, should be 256 bytes boundary aligned<br>
- *      (SGDK automatically align WAV resource as needed)
+ *      (ISDK automatically align WAV resource as needed)
  *  \param len
  *      Size of sample in bytes, should be a multiple of 256<br>
- *      (SGDK automatically adjust WAV resource size as needed)
+ *      (ISDK automatically adjust WAV resource size as needed)
  *  \param channel
  *      Channel to use to play sample.<br>
  *      SOUND_PCM_CH_AUTO = auto selection from current channel usage<br>
@@ -177,10 +177,10 @@ bool XGM2_playPCM(const u8 *sample, const u32 len, const SoundPCMChannel channel
  *
  *  \param sample
  *      Sample address, should be 256 bytes boundary aligned<br>
- *      (SGDK automatically align WAV resource as needed)
+ *      (ISDK automatically align WAV resource as needed)
  *  \param len
  *      Size of sample in bytes, should be a multiple of 256<br>
- *      (SGDK automatically adjust WAV resource size as needed)
+ *      (ISDK automatically adjust WAV resource size as needed)
  *  \param channel
  *      Channel to use to play sample.<br>
  *      SOUND_PCM_CH_AUTO = auto selection from current channel usage<br>

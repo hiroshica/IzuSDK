@@ -1,6 +1,6 @@
 /**
  *  \file config.h
- *  \brief Basic SGDK library configuration file
+ *  \brief Basic ISDK library configuration file
  *  \author Stephane Dallongeville
  *  \date 08/2011
  *
@@ -112,8 +112,8 @@
 
 /**
  *  \brief
- *      Set it to 1 if you want to use newlib with SGDK.<br>
- *      That will disable any standard methods from SGDK to replace them by newlib library implementation.
+ *      Set it to 1 if you want to use newlib with ISDK.<br>
+ *      That will disable any standard methods from ISDK to replace them by newlib library implementation.
  */
 #define ENABLE_NEWLIB           0
 

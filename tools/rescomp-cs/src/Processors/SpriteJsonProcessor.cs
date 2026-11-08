@@ -1,8 +1,8 @@
 using System.Globalization;
-using Sgdk.Rescomp.Resources;
-using Sgdk.Rescomp.Types;
+using Isdk.Rescomp.Resources;
+using Isdk.Rescomp.Types;
 
-namespace Sgdk.Rescomp.Processors;
+namespace Isdk.Rescomp.Processors;
 
 // [EXT] SPRX: JSON sprite resource (extended frames, see inc/sprx.h).
 

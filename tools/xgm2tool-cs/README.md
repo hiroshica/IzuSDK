@@ -10,7 +10,7 @@
     dotnet out/xgm2tool.dll a.vgm b.vgm c.vgm out.xgc      (複数曲)
 
 `surugacc/build.ps1` と `tools/rescomp-cs/compare.ps1` は、これを自動でビルドして
-環境変数 `SGDK_XGM2TOOL` に dll の場所を入れ、rescomp (C#) の XGM2 から呼びます。
+環境変数 `ISDK_XGM2TOOL`（旧名 `SGDK_XGM2TOOL`）に dll の場所を入れ、rescomp (C#) の XGM2 から呼びます。
 
 ## Java 版との違い
 

@@ -266,7 +266,7 @@ void VDP_loadFontData(const u32 *font, u16 length, TransferMethod tm);
  *      Load font from the specified <i>Font</i> tileset in VRAM.
  *
  *  \param font
- *      TileSet containing the font (should be 16*6 characters font, see SGDK default font at <i>res\image\font_default.png</i>).<br>
+ *      TileSet containing the font (should be 16*6 characters font, see ISDK default font at <i>res\image\font_default.png</i>).<br>
  *      The TileSet is unpacked "on-the-fly" if needed (require some memory).<br>
  *      Using DMA_QUEUE for packed resource is unsafe as the resource will be released and eventually
  *      can be overwritten before DMA operation so use DMA_QUEUE_COPY in that case or unpack the resource first.

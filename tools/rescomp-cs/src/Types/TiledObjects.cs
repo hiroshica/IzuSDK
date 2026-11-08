@@ -1,30 +1,30 @@
 using System.Text;
 using System.Xml;
 
-namespace Sgdk.Rescomp.Types;
+namespace Isdk.Rescomp.Types;
 
-/// <summary>SGDK 側のフィールドの型 (Java 版の SFieldDef.SGDKObjectType)。</summary>
-public enum SGDKObjectType { U8, S8, U16, S16, U32, S32, F16, F32, BOOL, STRING, OBJECT }
+/// <summary>IsuSDK 側のフィールドの型 (Java 版の SFieldDef.SGDKObjectType)。</summary>
+public enum IsdkObjectType { U8, S8, U16, S16, U32, S32, F16, F32, BOOL, STRING, OBJECT }
 
 /// <summary>Tiled 側のプロパティの型 (Java 版の TFieldDef.TiledObjectType)。</summary>
 public enum TiledObjectType { INT, FLOAT, BOOL, STRING, COLOR, FILE, OBJECT, ENUM, LIST }
 
 public static class ObjectTypes
 {
-    public static string Name(this SGDKObjectType t) => t.ToString().ToLowerInvariant();
+    public static string Name(this IsdkObjectType t) => t.ToString().ToLowerInvariant();
     public static string Name(this TiledObjectType t) => t.ToString().ToLowerInvariant();
 
-    public static bool TryParseSgdk(string s, out SGDKObjectType type)
+    public static bool TryParseIsdk(string s, out IsdkObjectType type)
     {
         var t = s.ToLowerInvariant();
-        foreach (SGDKObjectType v in Enum.GetValues<SGDKObjectType>())
+        foreach (IsdkObjectType v in Enum.GetValues<IsdkObjectType>())
             if (t == v.Name()) { type = v; return true; }
         type = default;
         return false;
     }
 
-    public static SGDKObjectType ParseSgdk(string s) =>
-        TryParseSgdk(s, out var t) ? t : throw new ArgumentException("Error: invalid SGDK field type: " + s);
+    public static IsdkObjectType ParseIsdk(string s) =>
+        TryParseIsdk(s, out var t) ? t : throw new ArgumentException("Error: invalid ISDK field type: " + s);
 
     public static TiledObjectType ParseTiled(string s)
     {
@@ -34,23 +34,23 @@ public static class ObjectTypes
         throw new ArgumentException("Error: invalid Tiled field type: " + s);
     }
 
-    public static int Size(this SGDKObjectType t) => t switch
+    public static int Size(this IsdkObjectType t) => t switch
     {
-        SGDKObjectType.F16 or SGDKObjectType.S16 or SGDKObjectType.U16 => 2,
-        SGDKObjectType.F32 or SGDKObjectType.S32 or SGDKObjectType.U32 or SGDKObjectType.STRING or SGDKObjectType.OBJECT => 4,
+        IsdkObjectType.F16 or IsdkObjectType.S16 or IsdkObjectType.U16 => 2,
+        IsdkObjectType.F32 or IsdkObjectType.S32 or IsdkObjectType.U32 or IsdkObjectType.STRING or IsdkObjectType.OBJECT => 4,
         _ => 1,
     };
 
-    public static bool Accept(this SGDKObjectType t, TiledObjectType type) => t switch
+    public static bool Accept(this IsdkObjectType t, TiledObjectType type) => t switch
     {
-        SGDKObjectType.U8 => type is TiledObjectType.INT or TiledObjectType.ENUM,
-        SGDKObjectType.U16 => type is TiledObjectType.FLOAT or TiledObjectType.INT or TiledObjectType.ENUM,
-        SGDKObjectType.U32 => type is TiledObjectType.FLOAT or TiledObjectType.INT or TiledObjectType.COLOR or TiledObjectType.ENUM,
-        SGDKObjectType.S8 => type == TiledObjectType.INT,
-        SGDKObjectType.S16 or SGDKObjectType.S32 or SGDKObjectType.F16 or SGDKObjectType.F32 => type is TiledObjectType.FLOAT or TiledObjectType.INT,
-        SGDKObjectType.BOOL => type == TiledObjectType.BOOL,
-        SGDKObjectType.STRING => type == TiledObjectType.STRING,
-        SGDKObjectType.OBJECT => type == TiledObjectType.OBJECT,
+        IsdkObjectType.U8 => type is TiledObjectType.INT or TiledObjectType.ENUM,
+        IsdkObjectType.U16 => type is TiledObjectType.FLOAT or TiledObjectType.INT or TiledObjectType.ENUM,
+        IsdkObjectType.U32 => type is TiledObjectType.FLOAT or TiledObjectType.INT or TiledObjectType.COLOR or TiledObjectType.ENUM,
+        IsdkObjectType.S8 => type == TiledObjectType.INT,
+        IsdkObjectType.S16 or IsdkObjectType.S32 or IsdkObjectType.F16 or IsdkObjectType.F32 => type is TiledObjectType.FLOAT or TiledObjectType.INT,
+        IsdkObjectType.BOOL => type == TiledObjectType.BOOL,
+        IsdkObjectType.STRING => type == TiledObjectType.STRING,
+        IsdkObjectType.OBJECT => type == TiledObjectType.OBJECT,
         _ => false,
     };
 }
@@ -61,13 +61,13 @@ public sealed class SField
     static int genId;
 
     public readonly string Name;
-    public readonly SGDKObjectType Type;
+    public readonly IsdkObjectType Type;
     public readonly long? LongValue;
     readonly int internalId;
     public bool Padding;
     string value;
 
-    public SField(string name, SGDKObjectType type, string value)
+    public SField(string name, IsdkObjectType type, string value)
     {
         Name = name;
         Type = type;
@@ -77,8 +77,8 @@ public sealed class SField
         internalId = genId++;
     }
 
-    public bool IsString => Type == SGDKObjectType.STRING;
-    public bool IsPointer => Type == SGDKObjectType.OBJECT;
+    public bool IsString => Type == IsdkObjectType.STRING;
+    public bool IsPointer => Type == IsdkObjectType.OBJECT;
     public bool IsIntData => !IsString && !IsPointer;
 
     long? ComputeLongValue()
@@ -88,13 +88,13 @@ public sealed class SField
         if (!JavaCompat.TryParseDouble(value, out double v))
             return null;
 
-        if (Type == SGDKObjectType.F16)
+        if (Type == IsdkObjectType.F16)
         {
             if (v > 511.4d || v < -512.4d)
                 throw new Exception("Value " + v.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) + " for field '" + Name + "' overflows the specified fix16 type");
             v *= Math.Pow(2, 6);
         }
-        else if (Type == SGDKObjectType.F32)
+        else if (Type == IsdkObjectType.F32)
         {
             if (v > 2097151.4d || v < -2097152.4d)
                 throw new Exception("Value " + v.ToString("0.000", System.Globalization.CultureInfo.InvariantCulture) + " for field '" + Name + "' overflows the specified fix32 type");
@@ -104,12 +104,12 @@ public sealed class SField
         long result = JavaCompat.Round(v);
         bool overflow = Type switch
         {
-            SGDKObjectType.S8 => result > sbyte.MaxValue || result < sbyte.MinValue,
-            SGDKObjectType.U8 => result > 255 || result < 0,
-            SGDKObjectType.S16 => result > short.MaxValue || result < short.MinValue,
-            SGDKObjectType.U16 => result > 65535 || result < 0,
-            SGDKObjectType.S32 => result > int.MaxValue || result < int.MinValue,
-            SGDKObjectType.U32 => result > 4294967295L || result < 0,
+            IsdkObjectType.S8 => result > sbyte.MaxValue || result < sbyte.MinValue,
+            IsdkObjectType.U8 => result > 255 || result < 0,
+            IsdkObjectType.S16 => result > short.MaxValue || result < short.MinValue,
+            IsdkObjectType.U16 => result > 65535 || result < 0,
+            IsdkObjectType.S32 => result > int.MaxValue || result < int.MinValue,
+            IsdkObjectType.U32 => result > 4294967295L || result < 0,
             _ => false,
         };
         if (overflow)
@@ -150,19 +150,19 @@ public sealed class SField
         string sVal = LongValue == null ? value : LongValue.Value.ToString();
         switch (Type)
         {
-            case SGDKObjectType.F32:
-            case SGDKObjectType.S32:
-            case SGDKObjectType.U32:
+            case IsdkObjectType.F32:
+            case IsdkObjectType.S32:
+            case IsdkObjectType.U32:
                 outS.Append("    dc.l    " + sVal + "\t\t// " + Name + "\n");
                 break;
-            case SGDKObjectType.F16:
-            case SGDKObjectType.S16:
-            case SGDKObjectType.U16:
+            case IsdkObjectType.F16:
+            case IsdkObjectType.S16:
+            case IsdkObjectType.U16:
                 outS.Append("    dc.w    " + sVal + "\t\t// " + Name + "\n");
                 break;
-            case SGDKObjectType.S8:
-            case SGDKObjectType.U8:
-            case SGDKObjectType.BOOL:
+            case IsdkObjectType.S8:
+            case IsdkObjectType.U8:
+            case IsdkObjectType.BOOL:
                 outS.Append("    dc.b    " + sVal + "\t\t// " + Name + "\n");
                 break;
         }
@@ -195,15 +195,15 @@ public sealed class TField
         this.value = value;
     }
 
-    public SField ToSField(SGDKObjectType sgdkType)
+    public SField ToSField(IsdkObjectType isdkType)
     {
-        if (!sgdkType.Accept(Type))
-            throw new Exception("Error: cannot convert Tiled type '" + Type.Name() + " to SGDK '" + sgdkType.Name() + "' type (not compatible)");
+        if (!isdkType.Accept(Type))
+            throw new Exception("Error: cannot convert Tiled type '" + Type.Name() + " to ISDK '" + isdkType.Name() + "' type (not compatible)");
         string adjVal = value;
         // オブジェクトの参照: 0 は NULL。ほかは id のまま置いておき、あとで名前に直す
-        if (sgdkType == SGDKObjectType.OBJECT && JavaCompat.ParseInt(value, 0) == 0)
+        if (isdkType == IsdkObjectType.OBJECT && JavaCompat.ParseInt(value, 0) == 0)
             adjVal = "";
-        return new SField(Name, sgdkType, adjVal);
+        return new SField(Name, isdkType, adjVal);
     }
 }
 
@@ -234,7 +234,7 @@ public sealed class SObject
     public void UpdateObjectFieldsReferencesTo(SObject linked)
     {
         string reference = linked.BaseName + "_" + linked.Id;
-        foreach (var f in Fields.Where(f => f.Type == SGDKObjectType.OBJECT).ToList())
+        foreach (var f in Fields.Where(f => f.Type == IsdkObjectType.OBJECT).ToList())
             f.ChangeValueToIfContainId(reference, linked.Id);
     }
 
@@ -288,7 +288,7 @@ public sealed class TMXObjects
     public readonly string LayerName;
     public readonly List<SObject> Objects = new();
 
-    public TMXObjects(string baseId, string file, string layerName, string sortBy, List<(string Name, SGDKObjectType Type)> fieldDefs, string typeFilter)
+    public TMXObjects(string baseId, string file, string layerName, string sortBy, List<(string Name, IsdkObjectType Type)> fieldDefs, string typeFilter)
     {
         if (!System.IO.File.Exists(file))
             throw new FileNotFoundException("TMX file '" + file + " not found !");

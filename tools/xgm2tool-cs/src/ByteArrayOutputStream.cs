@@ -1,4 +1,4 @@
-namespace Sgdk.Xgm2Tool;
+namespace Isdk.Xgm2Tool;
 
 /// <summary>java.io.ByteArrayOutputStream の最小互換実装。</summary>
 public class ByteArrayOutputStream

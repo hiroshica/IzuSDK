@@ -1,4 +1,4 @@
-namespace Sgdk.Rescomp.Types;
+namespace Isdk.Rescomp.Types;
 
 /// <summary>メタタイル (NxN タイルのかたまり)。Java 版の type.Metatile。</summary>
 public sealed class Metatile

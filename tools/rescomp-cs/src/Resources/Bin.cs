@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace Sgdk.Rescomp.Resources;
+namespace Isdk.Rescomp.Resources;
 
 /// <summary>バイナリデータ (Java 版の resource.Bin)。ほかのリソースのデータもこれで出力する。</summary>
 public class Bin : Resource

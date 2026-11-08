@@ -1,4 +1,4 @@
-namespace Sgdk.Rescomp;
+namespace Isdk.Rescomp;
 
 /// <summary>
 /// .res の 1 行 (リソースの種類ごと) を処理するもの。Java 版の sgdk.rescomp.Processor にあたる。

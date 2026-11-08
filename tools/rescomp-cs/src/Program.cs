@@ -1,4 +1,4 @@
-using Sgdk.Rescomp;
+using Isdk.Rescomp;
 
 // rescomp.jar (Launcher.java) と同じ引数
 string fileName = null, fileNameOut = null, depTarget = null;
@@ -14,7 +14,7 @@ foreach (var param in args)
     else if (dep && depTarget == null) depTarget = param;
 }
 
-Console.WriteLine("ResComp 4.02 (C#) - SGDK Resource Compiler - Copyright 2026 (Stephane Dallongeville)");
+Console.WriteLine("ResComp 4.02 (C#) - IsuSDK Resource Compiler (based on SGDK rescomp, Copyright Stephane Dallongeville)");
 
 if (fileName == null)
 {
