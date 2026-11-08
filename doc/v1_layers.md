@@ -89,7 +89,7 @@ DMA（SCHED_TASK_DMA）→ スクロール（SCHED_TASK_SCROLL）→ パレッ�
 
 SurugaCC（-O2）で `sample/game/sonic` を `run68k.py --profile` で 180 フレーム動かして比べると、V1 は変更前より 1 フレームあたり約 95 サイクル（1 フレームの 0.07%）多いだけでした。増えたのは `SPR_update()` のポート経由の呼び出しと、スケジューラから処理を関数ポインタで呼ぶ分です。
 
-サンプル（hello-world, image, pools, sprites-sharing-tiles, tile-animation, cube-3D, partic, hilight-shadow, sprite-masking, sonic, console, benchmark, h-int/scaling, h-int/wobble, scroll/linescroll）と fz2 の画面は変更前と同じでした。違いは CPU 負荷を表示するカーソル（`SYS_showFrameLoad`）の位置が 1 ライン下がったことと、benchmark の時間とメモリの数字だけです。
+サンプル（hello-world, image, pools, sprites-sharing-tiles, tile-animation, cube-3D, partic, hilight-shadow, sprite-masking, sonic, console, benchmark, h-int/scaling, h-int/wobble, scroll/linescroll）と fz2 の画面は変更前と同じでした。違いは CPU 負荷を表示するカーソル（`SYS_showFrameLoad`）の位置が 1 ライン下がったことと、benchmark のメモリの数字（静的に使う RAM が 31 バイト増えた: スケジューラの表、フック、スプライトのポート）だけです。
 
 ## ビルド
 
@@ -102,6 +102,7 @@ SurugaCC（-O2）で `sample/game/sonic` を `run68k.py --profile` で 180 フ�
 - ファイルごと移したもの（ほとんど）は、git が名前の変更として追いかけるので、`git merge upstream/master` で中身の変更はそのまま入ります。
   本家で新しく足されたファイルは `src/` の直下に来るので、どの層か決めて移してください。
 - 中身を分けたり書き換えたりしたところには `[V1]` の目印があります（`git grep "\[V1\]"`）。主なものは次のとおりです。
+  本家がこれらを変えたときは衝突するので、表の移した先へ手で反映してください（試しに本家側で `src/z80_ctrl.c` と `src/vdp_spr.c` を変えてマージすると、ファイルごと移した `vdp_spr.c` は自動で入り、2 つに分けた `z80_ctrl.c` は衝突しました）。
 
 | 本家のファイル | 移した先 |
 |---|---|
