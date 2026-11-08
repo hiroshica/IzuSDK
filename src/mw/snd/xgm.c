@@ -5,7 +5,7 @@
 
 #include "snd/sound.h"
 #include "snd/xgm.h"
-#include "src/snd/drv_xgm.h"
+#include "src/mw/snd/drv_xgm.h"
 #include "snd/smp_null.h"
 
 #include "sys.h"

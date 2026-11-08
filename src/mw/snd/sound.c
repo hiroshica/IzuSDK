@@ -5,7 +5,7 @@
 
 #include "snd/sound.h"
 // auto-generated
-#include "src/snd/drv_null.h"
+#include "src/mw/snd/drv_null.h"
 
 #include "ym2612.h"
 #include "psg.h"

@@ -146,12 +146,10 @@ no_user_task:
         move.l  z80VIntCB, %a0              /* load Z80 V-Int handler */
         jsr     (%a0)                       /* call user callback */
 
-        btst    #1, VBlankProcess+1         /* PROCESS_BITMAP_TASK ? (use VBlankProcess+1 as btst is a byte operation) */
-        beq.s   no_bmp_task
+        /* [V1] library V-Int task (hal_cpu_set_vint_task), the HAL no longer calls BMP_doVBlankProcess directly */
+        move.l  vintTaskCB, %a0             /* load library V-Int task */
+        jsr     (%a0)                       /* call it */
 
-        jsr     BMP_doVBlankProcess         /* do BMP vblank task */
-
-no_bmp_task:
         move.l  vintCB, %a0                 /* load user callback */
         jsr     (%a0)                       /* call user callback */
         andi.w  #0xFFFE, intTrace           /* out V-Int */

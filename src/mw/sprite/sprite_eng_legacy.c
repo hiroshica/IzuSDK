@@ -18,6 +18,7 @@
 #include "kdebug.h"
 #include "string.h"
 #include "timer.h"
+#include "mw/sched.h"
 
 
 //#define SPR_DEBUG
@@ -127,6 +128,8 @@ NO_INLINE void SPR_initEx(u16 vramSize)
 
     // create sprites object pool
     spritesPool = POOL_create(MAX_SPRITE, sizeof(Sprite));
+    // [V1] VDP tilemap / table move --> defrag sprite VRAM (was a direct call from vdp.c)
+    SCHED_setEventHandler(SCHED_EVENT_VRAM_LAYOUT, SPR_defragVRAM);
 
     // store allocated VRAM size to let SGDK know about it
     spriteVramSize = vramSize ? vramSize : 420;
@@ -161,6 +164,7 @@ NO_INLINE void SPR_end()
         // release memory
         POOL_destroy(spritesPool);
         spritesPool = NULL;
+        SCHED_setEventHandler(SCHED_EVENT_VRAM_LAYOUT, NULL);
         VRAM_releaseRegion(&vram);
         spriteVramSize = 0;
 
