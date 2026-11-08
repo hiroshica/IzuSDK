@@ -204,7 +204,7 @@ void SYS_hardReset(void);
 
 /**
  *  \brief
- *      Wait for start of VBlank and do all the VBlank processing (DMA transfers, XGM driver tempo, Joypad pooling..)
+ *      Wait for start of VBlank and do all the VBlank processing (DMA transfers, sound driver update, Joypad pooling..)
  *  \return FALSE if process was canceled because the method was called from V-Int (vertical interrupt) callback
  *      in which case we exit the function as V-Int will be triggered immediately.<br>
  *
@@ -222,7 +222,7 @@ void SYS_hardReset(void);
 bool SYS_doVBlankProcess(void);
 /**
  *  \brief
- *      Do all the VBlank processing (DMA transfers, XGM driver tempo, Joypad pooling..)
+ *      Do all the VBlank processing (DMA transfers, sound driver update, Joypad pooling..)
  *  \param processTime
  *      Define at which period we start VBlank process, accepted values are:<br>
  *      <b>IMMEDIATELY</b>      Start VBlank process immediatly whatever we are in blanking period or not
@@ -368,7 +368,7 @@ void SYS_setVBlankCallback(VoidCallback *CB);
  * Vertical interrupt happen at the end of display period at the start of the vertical blank period.<br>
  * This period is usually used to prepare next frame data (refresh sprites, scrolling ...) though now
  * ISDK handle most of these process using #SYS_doVBlankProcess() so you can control it manually (do it from main loop or put it in Vint callback).<br>
- * The only things that ISDK always handle from the vint callback is the XGM sound driver music tempo and Bitmap engine phase reset.<br>
+ * The only things that ISDK always handle from the vint callback is the sound driver update (Z80 V-Int callback, MDSDRV) and Bitmap engine phase reset.<br>
  * It's recommended to keep your code as fast as possible as it will eat precious VBlank time, nor you should touch the VDP from your Vint callback
  * otherwise you will need to protect any VDP accesses from your main loop (which is painful), use the SYS_setVBlankCallback(..) instead for that.
  *

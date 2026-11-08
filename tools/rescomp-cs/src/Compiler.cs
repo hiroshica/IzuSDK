@@ -28,8 +28,6 @@ public static class Compiler
         new MapProcessor(),
         new ObjectsProcessor(),
         new WavProcessor(),
-        new XgmProcessor(),
-        new Xgm2Processor(),
         // [EXT] SPRX: JSON sprite (extended frames)
         new SpriteJsonKindsProcessor(),
         new SpriteJsonProcessor(),

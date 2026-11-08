@@ -1,5 +1,7 @@
 //======================================================================
-// MDSDRV API wrapper for SGDK
+// MDSDRV API wrapper for IzuSDK
+// (altered from the SGDK wrapper: moved into the library, the driver blob is
+//  linked from res/libres.res and MDS_update() runs from the Z80 V-Int hook)
 //======================================================================
 // Copyright (c) 2020 Ian Karlsson
 //
@@ -21,11 +23,20 @@
 //    distribution.
 //======================================================================
 
-#ifndef MDSDRV_H
-#define MDSDRV_H
+/**
+ *  \file snd/mdsdrv.h
+ *  \brief MDSDRV sound driver (the only music / SFX driver of IzuSDK)
+ *
+ *  The driver code (mdsdrvdat) is part of the library (res/libres.res).<br>
+ *  Each project supplies its own sequence and PCM data made with mdslink
+ *  (for instance: BIN mdsseqdat "snd/mdsseq.bin" 2 2 0 NONE FALSE and
+ *  BIN mdspcmdat "snd/mdspcm.bin" 32768 2 0 NONE FALSE).<br>
+ *  Once MDS_init() succeeds, MDS_update() is called automatically every V-Int
+ *  (through the Z80 V-Int callback) until another Z80 driver is loaded.
+ */
 
-#include "mdsdat.h"
-#include "mdsseq.h"
+#ifndef _SND_MDSDRV_H_
+#define _SND_MDSDRV_H_
 
 /* Work area size */
 #define MDS_WORK_SIZE 512
@@ -55,20 +66,48 @@
 #define MDS_CMD_SET_TEMPO      15
 
 /* Work area, resides in ram */
-extern u16 MDS_work [MDS_WORK_SIZE];
+extern u16 MDS_work[MDS_WORK_SIZE];
 
-/* API functions - see mdsdrv.c */
+/**
+ *  \brief
+ *      Initialize MDSDRV and make it the current Z80 driver.
+ *
+ *  \param seqdata Pointer to sequence data file. Must be word aligned.
+ *  \param pcmdata Pointer to PCM data file. Must be 32K aligned.
+ *  \return 0 on success, non zero when the driver and the sequence data versions don't match.
+ *
+ *  On success MDS_update() is registered as the Z80 V-Int callback, so it runs every V-Int.
+ */
 u16 MDS_init(const u8* seqdata, const u8* pcmdata);
+/**
+ *  \brief
+ *      Sound request.
+ *
+ *  \param slot Request priority (range 0-3, MDS_BGM, MDS_SE1..)
+ *  \param id   Sound number. 0 stops the sound playing in this slot.
+ */
 void MDS_request(u16 slot, u16 id);
+/**
+ *  \brief
+ *      Command request for low-level access (see MDSDRV documentation).
+ */
 u32 MDS_command(u16 id, u16 param);
+/**
+ *  \brief
+ *      Command request for low-level access (command number >= 0x09).
+ */
 u32 MDS_command2(u16 id, u16 param1, u16 param2);
 
-/* Manually update sound driver */
-void MDS_update();
+/**
+ *  \brief
+ *      Update the sound driver. Must run once per V-Int.<br>
+ *      MDS_init() already registers it as the Z80 V-Int callback, so you don't need to call it.
+ */
+void MDS_update(void);
 
 /* Wrapper functions */
-char* MDS_get_version_str();
+char* MDS_get_version_str(void);
 void MDS_pause(u16 slot, bool state);
 void MDS_fade(u8 target, u8 speed, bool stop_when_done);
 
-#endif
+#endif // _SND_MDSDRV_H_

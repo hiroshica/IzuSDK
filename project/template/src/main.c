@@ -6,7 +6,6 @@
 
 // include our own resources
 #include "res_gfx.h"
-#include "res_snd.h"
 
 
 #define TABLE_LEN       220
@@ -56,8 +55,6 @@ int main(bool hardReset)
 
     // set up the joy handler
     JOY_setEventHandler(&joyEvent);
-
-    XGM_startPlay(mus_actraiser);
 
     donutPhase = FIX16(0);
     donutPhaseSpeed = FIX16(2);

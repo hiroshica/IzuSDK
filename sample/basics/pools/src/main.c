@@ -175,7 +175,6 @@ void Game_MainLoop()
 void Game_Init()
 {
     // Initialize systems
-    XGM2_loadDriver(TRUE);
     JOY_init();
     SPR_init();
 
@@ -469,8 +468,6 @@ void Player_TryShoot()
     Projectile_Spawn(F16_toInt(game.player.x), F16_toInt(game.player.y));
     Projectile_Spawn(F16_toInt(game.player.x), F16_toInt(game.player.y) + PROJECTILE_OFFSET_Y);
 
-    // Play shooting sound
-    XGM2_playPCM(xpcm_shoot, sizeof(xpcm_shoot), SOUND_PCM_CH2);
 }
 
 // Update respawn timer and spawn player when ready
@@ -616,6 +613,4 @@ void Explosion_Spawn(s16 x, s16 y)
     SPR_setAlwaysOnTop(explosion->sprite);
     SPR_setAnimationLoop(explosion->sprite, FALSE);
 
-    // Play explosion sound
-    XGM2_playPCM(xpcm_explosion, sizeof(xpcm_explosion), SOUND_PCM_CH3);
 }

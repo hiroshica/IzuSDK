@@ -22,12 +22,11 @@ public static class Util
         if (up.Length == 0 || up == "PCM" || up == "DEFAULT") return SoundDriver.PCM;
         if (up == "DPCM2") return SoundDriver.DPCM2;
         if (up == "PCM4") return SoundDriver.PCM4;
-        if (up == "XGM") return SoundDriver.XGM;
-        if (up == "XGM2") return SoundDriver.XGM2;
+        if (up == "XGM" || up == "XGM2") throw new ArgumentException("'" + text + "' sound driver was removed from IzuSDK (use MDSDRV instead).");
         if (up == "0") throw new ArgumentException("'" + text + "' is not anymore recognized as valid sound driver, use 'PCM' instead.");
         if (up == "1") throw new ArgumentException("'" + text + "' is not anymore recognized as valid sound driver, use 'DPCM2' instead.");
         if (up == "2") throw new ArgumentException("'" + text + "' is not anymore recognized as valid sound driver, use 'PCM4' instead.");
-        if (up == "3" || up == "4" || up == "5") throw new ArgumentException("'" + text + "' is not anymore recognized as valid sound driver, use 'XGM' instead.");
+        if (up == "3" || up == "4" || up == "5") throw new ArgumentException("'" + text + "' is not anymore recognized as valid sound driver.");
         throw new ArgumentException("Unrecognized sound driver: '" + text + "'");
     }
 

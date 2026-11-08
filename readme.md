@@ -5,6 +5,8 @@
 自前の C# 製コンパイラ **SurugaCC** でビルドするように作り直しています。
 本家からは切り離してあり、本家の更新は取り込みません。
 
+リポジトリ: https://github.com/hiroshica/IzuSDK （旧名 hiroshica/SGDK）
+
 SGDK との互換のため、関数名（`SPR_*`, `VDP_*` など）やマクロ（`SGDK`, `SGDK_VERSION`）、環境変数 `GDK` はそのまま使えます。
 IzuSDK としての版数は `ISDK_VERSION`、目印のマクロは `ISDK` です（`genesis.h`）。
 
@@ -13,7 +15,8 @@ IzuSDK としての版数は `ISDK_VERSION`、目印のマクロは `ISDK` で�
 - ビルドは SurugaCC だけ（GCC・make・Code::Blocks・CMake は使わない）: [surugacc/README.md](surugacc/README.md)
 - ライブラリのソースを HAL / ミドルウェア / Util の層に分けた（V1）: [doc/v1_layers.md](doc/v1_layers.md)
 - スプライトは SPRX（拡張コマ）と JSON のスプライトリソース SPRJ が標準: [doc/sprx.md](doc/sprx.md)
-- リソース変換（rescomp）と xgm2tool の C# 版: `tools/rescomp-cs`, `tools/xgm2tool-cs`
+- リソース変換（rescomp）の C# 版: `tools/rescomp-cs`
+- 音のドライバは MDSDRV だけ（XGM / XGM2 は外した）: [doc/mdsdrv.md](doc/mdsdrv.md)
 
 ## 使い方
 
@@ -31,8 +34,8 @@ surugacc\build.cmd sample\basics\hello-world  # プロジェクトをビルド�
 |---|---|
 | `inc/`, `src/`, `res/` | ライブラリのヘッダー、ソース、ライブラリのリソース |
 | `surugacc/` | SurugaCC でビルドするスクリプト |
-| `tools/` | C# 版の rescomp / xgm2tool と sjasm（Z80 アセンブラ）のソース |
-| `bin/` | ビルドで使う道具（rescomp.jar, xgmtool.exe と libgcc_s_dw2-1.dll, xgm2tool.jar, apj.jar, lz4w.jar, sjasm.exe） |
+| `tools/` | C# 版の rescomp と sjasm（Z80 アセンブラ）のソース |
+| `bin/` | ビルドで使う道具（rescomp.jar, apj.jar, lz4w.jar, sjasm.exe） |
 | `doc/` | IzuSDK の説明 |
 | `project/template/` | 新しいプロジェクトのひな形 |
 | `sample/` | サンプル（本家のものと IzuSDK で足したもの） |
@@ -40,4 +43,4 @@ surugacc\build.cmd sample\basics\hello-world  # プロジェクトをビルド�
 ## ライセンス
 
 IzuSDK は SGDK から派生したもので、ライブラリと道具は SGDK と同じ MIT ライセンスです（[license.txt](license.txt)、Copyright Stephane Dallongeville）。
-`bin/libgcc_s_dw2-1.dll`（xgmtool.exe が使う）は GCC の実行時ライブラリ例外つきの GPL です（[COPYING.RUNTIME](COPYING.RUNTIME)）。
+MDSDRV のラッパー（`src/mw/snd/mdsdrv.c`, `inc/snd/mdsdrv.h`）とドライバ本体（`res/sound/mdsdrv.bin`）は Ian Karlsson 作の MDSDRV で、zlib ライセンスです（ファイルの先頭に書いてあります）。

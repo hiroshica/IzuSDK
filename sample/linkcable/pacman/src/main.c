@@ -450,8 +450,6 @@ void initControllerPort2() {
 
 				memcpy(gameModeText, TEXT_LINK_MASTER, GAME_MODE_TEXT_SIZE);
 
-				// sound that connection via Link cable was successfully created
-				XGM_startPlayPCM(SFX_SOUND_CONNECT_LINK_CABLE, 15, SOUND_PCM_CH4);
 
 				// need to wait a bit so slave console can process received packet
 				SYS_doVBlankProcess();
@@ -515,8 +513,6 @@ void initControllerPort2() {
 				// to port 1 of another console via SEGA Link Cable connected to port 2 of both consoles
 				memcpy(gameModeText, TEXT_LINK_SLAVE, GAME_MODE_TEXT_SIZE);
 
-				// sound that connection via Link cable was successfully created
-				XGM_startPlayPCM(SFX_SOUND_CONNECT_LINK_CABLE, 15, SOUND_PCM_CH4);
 
 				// exit function
 				return;
@@ -776,8 +772,6 @@ void resetGame() {
  * food001 food010 food100
  */
 void incFood() {
-	// sound of eating a dot
-	XGM_startPlayPCM(SFX_SOUND_EAT, 1, SOUND_PCM_CH2);
 
 	++food001;
 	if (food001 >= 10) {
@@ -828,8 +822,6 @@ u8 pacmanLooser() {
 
 			return 1;
 		} else {
-			// sound of eating ghost
-			XGM_startPlayPCM(SFX_SOUND_EAT_SHADOW, 15, SOUND_PCM_CH3);
 
 			// RED is edible at the moment
 			// Send it to the Ghost House
@@ -877,8 +869,6 @@ u8 pacmanLooser() {
 				// power-up
 				++powerBonus;
 
-				// sound of eating power-up
-				XGM_startPlayPCM(SFX_SOUND_POWERUP, 15, SOUND_PCM_CH2);
 
 				// update time when RED became edible
 				redTime = RED_TIME;
@@ -895,8 +885,6 @@ u8 pacmanLooser() {
 				// hide cherry
 				SPR_setPosition(cherrySprite, -90, 100);
 
-				// sound of eating cherry
-				XGM_startPlayPCM(SFX_SOUND_CHERRY, 15, SOUND_PCM_CH2);
 
 		    	if (MODE_PORT2_MASTER == controllerPort2Mode) {
 		    		// send to slave console that cherry was eaten
@@ -924,8 +912,6 @@ u8 pacmanLooser() {
 			// power-up
 			++powerBonus;
 
-			// sound of eating power-up
-			XGM_startPlayPCM(SFX_SOUND_POWERUP, 15, SOUND_PCM_CH2);
 
 			// update time when RED became edible
 			redTime = RED_TIME;
@@ -945,8 +931,6 @@ u8 pacmanLooser() {
 			SPR_setPosition(cherrySprite, -90, 100);
 			refreshCherry = 0;
 
-			// sound of eating cherry
-			XGM_startPlayPCM(SFX_SOUND_CHERRY, 15, SOUND_PCM_CH2);
 
 	    	if (MODE_PORT2_MASTER == controllerPort2Mode) {
 	    		// send to slave console that cherry was eaten
@@ -1006,8 +990,6 @@ u8 pacManState() {
 				// and give additional bonus
 				++powerBonus;
 
-				// sound of eating power-up
-				XGM_startPlayPCM(SFX_SOUND_POWERUP, 15, SOUND_PCM_CH2);
 
 		    	if (MODE_PORT2_MASTER == controllerPort2Mode) {
 		    		// send to slave console that power-up (green dot) was eaten
@@ -1021,8 +1003,6 @@ u8 pacManState() {
 				SPR_setPosition(cherrySprite, -90, 100);
 				refreshCherry = 0;
 
-				// sound of eating cherry
-				XGM_startPlayPCM(SFX_SOUND_CHERRY, 15, SOUND_PCM_CH2);
 
 		    	if (MODE_PORT2_MASTER == controllerPort2Mode) {
 		    		// send to slave console that cherry was eaten
@@ -1057,8 +1037,6 @@ u8 pacManState() {
 			// if all FOOD and POWER_FOOD are eaten - PACMAN won
 			if (winner()) {
 
-				// victory sound
-				XGM_startPlay(victory_vgm);
 
 
 				dxPacGirl = 0;
@@ -1081,8 +1059,6 @@ u8 pacManState() {
 			// did PACMAN eat the ghost (or did it eat us)
 			if (pacmanLooser()) {
 
-				// game over sound
-				XGM_startPlay(fatality_vgm);
 				return 0;
 			}
 
@@ -1147,8 +1123,6 @@ u8 pacGirlState() {
 				// and give additional bonus
 				++powerBonus;
 
-				// sound of eating power-up
-				XGM_startPlayPCM(SFX_SOUND_POWERUP, 15, SOUND_PCM_CH2);
 
 		    	if (MODE_PORT2_MASTER == controllerPort2Mode) {
 		    		// send to slave console that power-up (green dot) was eaten
@@ -1162,8 +1136,6 @@ u8 pacGirlState() {
 				SPR_setPosition(cherrySprite, -90, 100);
 				refreshCherry = 0;
 
-				// sound of eating cherry
-				XGM_startPlayPCM(SFX_SOUND_CHERRY, 15, SOUND_PCM_CH2);
 
 		    	if (MODE_PORT2_MASTER == controllerPort2Mode) {
 		    		// send to slave console that cherry was eaten
@@ -1198,8 +1170,6 @@ u8 pacGirlState() {
 			// if all FOOD and POWER_FOOD are eaten - PACMAN won
 			if (winner()) {
 
-				// victory sound
-				XGM_startPlay(victory_vgm);
 
 				dxPacGirl = 0;
 				dyPacGirl = 0;
@@ -1220,8 +1190,6 @@ u8 pacGirlState() {
 
 			// did PACMAN eat the ghost (or did it eat us)
 			if (pacmanLooser()) {
-				// game over sound
-				XGM_startPlay(fatality_vgm);
 				return 0;
 			}
 		}
@@ -1412,8 +1380,6 @@ u8 redState() {
 
 			// did PACMAN eat the ghost (or did it eat us)
 			if (pacmanLooser()) {
-				// game over music
-				XGM_startPlay(fatality_vgm);
 				// Pac-Man was eaten, game over
 				return 0;
 			}
@@ -1738,8 +1704,6 @@ void drawSprite(s16 i, s16 j, u8 val) {
     } else if (val == SHADOW) {
 		// logic for playing sound when ghost can be eaten
     	if (shadowLastSoundTime == 0) {
-    		// sound when ghost is edible
-    		XGM_startPlayPCM(SFX_SOUND_SHADOW, 15, SOUND_PCM_CH3);
     		shadowLastSoundTime = 20;
     	}
 
@@ -1898,10 +1862,6 @@ void actionsStateScreensaver() {
 		gameState = STATE_SELECT;
 		// draw background with player selection menu
 		drawBackground();
-		// stop playing SEGA sound
-		XGM_stopPlayPCM(SOUND_PCM_CH2);
-		// music playing when displaying player count selection menu
-		XGM_startPlay(contrah_vgm);
 	}
 }
 
@@ -1915,8 +1875,6 @@ void actionsStateSelectPlayers() {
 
 	if (((pad1 & BUTTON_START) || (pad2 & BUTTON_START)) && playersTime == 0) {
 		// Start pressed on 1st or 2nd joystick
-		// stop playing music on player selection screen
-		XGM_pausePlay();
 
 		// reset game to initial state
 		// initial character positions, reset scores, etc.
@@ -1946,11 +1904,7 @@ void actionsStateSelectPlayers() {
 				// protection against double start press
 				playersTime = 30;
 
-				// connection disconnect sound
-				XGM_startPlayPCM(SFX_SOUND_DISCONNECT_LINK_CABLE, 15, SOUND_PCM_CH3);
 
-				// enable music when displaying player count selection menu
-				XGM_startPlay(contrah_vgm);
 
 				// exit, don't start game yet, need to press start again
 				return;
@@ -1973,8 +1927,6 @@ void actionsStateSelectPlayers() {
 				// no Link cable connection
 				// and no 2nd controller inserted in SEGA port 2
 
-			   // enable music when displaying player count selection menu
-			   XGM_startPlay(contrah_vgm);
 
 			   return;
 			}
@@ -1990,8 +1942,6 @@ void actionsStateSelectPlayers() {
 		// draw background with maze for game
 		drawBackground();
 
-		// music playing during game
-		XGM_startPlay(comicszone_vgm);
 
 		// repeated press allowed only after 30 frames (to prevent immediate pause)
 		playersTime = 30;
@@ -2204,10 +2154,6 @@ void actionsStateResult() {
 		initScreensaver();
 		// draw SGDK on background
 		drawBackground();
-		// stop playing music
-		XGM_stopPlay();
-		// play SEGA sound!
-		XGM_startPlayPCM(SFX_SOUND_SEGA, 15, SOUND_PCM_CH2);
 	}
 }
 
@@ -2359,7 +2305,6 @@ void screensaver() {
 	   dxSonic = 3;
 	   // sonic walking - line 2 of animation in sonic.png file counting from 0
 	   SPR_setAnim(sonicSprite, 2);
-	   XGM_startPlay(sonic_vgm);
    } else if (sonicX <= 120) {
 	   dxSonic = 5;
 	   // sonic running - line 3 of animation in sonic.png file
@@ -2376,7 +2321,6 @@ void screensaver() {
    if (pacmanX > 90 && pacmanX < 190 && dx > 0) {
 	   // eating sound
 	   if (pacmanLastUpdateTime <= 0) {
-		   XGM_startPlayPCM(SFX_SOUND_EAT, 15, SOUND_PCM_CH2);
 		   pacmanLastUpdateTime = 10;
 	   } else {
 		   pacmanLastUpdateTime--;
@@ -2385,7 +2329,6 @@ void screensaver() {
 
    if (pacGirlX > 90 && pacGirlX < 190) {
 	   if (pacGirlLastUpdateTime <= 0) {
-		   XGM_startPlayPCM(SFX_SOUND_EAT, 15, SOUND_PCM_CH2);
 		   pacGirlLastUpdateTime = 10;
 	   } else {
 		   pacGirlLastUpdateTime--;
@@ -2600,15 +2543,11 @@ void slaveControls() {
 				dyPacGirl =0;
 
 				if (winner()) {
-					// game end sound - won
-					XGM_startPlay(victory_vgm);
 				} else {
 					// Pac-Man was eaten
 					map[pacmanY][pacmanX] = RED;
 					// remove Pac-Man sprite from screen (we were eaten)
 					SPR_setPosition(pacmanSprite, -90, 90);
-					// game end sound - lost
-					XGM_startPlay(fatality_vgm);
 				}
 
 				// calculate earned points
@@ -2631,8 +2570,6 @@ void slaveControls() {
 			break;
 			case OBJECT_TYPE_EAT_POWERUP:
 				// master console notified that powerup was eaten
-				// powerup eating sound
-				XGM_startPlayPCM(SFX_SOUND_POWERUP, 15, SOUND_PCM_CH2);
 
 				// RED became edible
 				redTime = RED_TIME;
@@ -2642,8 +2579,6 @@ void slaveControls() {
 			break;
 			case OBJECT_TYPE_EAT_SHADOW:
 				// master console notified that ghost was eaten
-				// ghost eating sound
-				XGM_startPlayPCM(SFX_SOUND_EAT_SHADOW, 15, SOUND_PCM_CH2);
 
 				// close door to ghost house
 				closeDoors();
@@ -2659,8 +2594,6 @@ void slaveControls() {
 			break;
 			case OBJECT_TYPE_EAT_CHERRY:
 				// master console notified that cherry was eaten
-				// cherry eating sound
-				XGM_startPlayPCM(SFX_SOUND_CHERRY, 15, SOUND_PCM_CH2);
 
 				// hide cherry
 				SPR_setPosition(cherrySprite, -90, 100);
@@ -2778,21 +2711,6 @@ u8 winner() {
  */
 void initSound() {
 	// voice during screensaver pronouncing word SEGA
-	XGM_setPCM(SFX_SOUND_SEGA, sega_sfx, sizeof(sega_sfx));
-	// sound of eating white dot - food
-	XGM_setPCM(SFX_SOUND_EAT, eat_sfx, sizeof(eat_sfx));
-	// sound of eating cherry
-	XGM_setPCM(SFX_SOUND_CHERRY, cherry_sfx, sizeof(cherry_sfx));
-	// sound of eating green dot - powerup
-	XGM_setPCM(SFX_SOUND_POWERUP, powerup_sfx, sizeof(powerup_sfx));
-	// sound when ghost is edible
-	XGM_setPCM(SFX_SOUND_SHADOW, shadow_sfx, sizeof(shadow_sfx));
-	// sound when ghost was eaten
-	XGM_setPCM(SFX_SOUND_EAT_SHADOW, eatred_sfx, sizeof(eatred_sfx));
-	// sound of creating connection via Link Cable
-	XGM_setPCM(SFX_SOUND_CONNECT_LINK_CABLE, connect_sfx, sizeof(connect_sfx));
-	// sound of disconnecting connection via Link Cable
-	XGM_setPCM(SFX_SOUND_DISCONNECT_LINK_CABLE, disconnect_sfx, sizeof(disconnect_sfx));
 }
 
 
@@ -2933,8 +2851,6 @@ int main() {
 	// Draw SEGA as background
 	drawBackground();
 
-	// SEGA sound at game start
-	XGM_startPlayPCM(SFX_SOUND_SEGA, 15, SOUND_PCM_CH2);
 
 	// game animation loop
 	while (1) {

@@ -48,8 +48,7 @@
 #include "psg.h"
 
 #include "snd/sound.h"
-#include "snd/xgm.h"
-#include "snd/xgm2.h"
+#include "snd/mdsdrv.h"
 #include "snd/smp_null.h"
 #include "snd/smp_null_dpcm.h"
 #include "snd/pcm/snd_pcm.h"

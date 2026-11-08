@@ -74,14 +74,6 @@ void Frame1Wait()
     SYS_doVBlankProcess(); // 1 wait
 }
 
-/*
- *  MDSDRV must always run in vblank.
- */
-void vbl_callback()
-{
-	MDS_update();
-}
-
 //------------------------------------------------
 //------------------------------------------------
 void MainInit()
@@ -119,7 +111,7 @@ void MainInit()
 		VDP_drawText("Please make sure that the driver and", 2, 4);
 		VDP_drawText("sequence data version matches.", 2, 5);
 	}
-	SYS_setVIntCallback(vbl_callback);  /* run MDSDRV in callback */
+	/* MDS_init() makes MDSDRV run every V-Int (no V-Int callback needed) */
 }
 //------------------------------------------------
 //------------------------------------------------

@@ -7,7 +7,6 @@
 #include "camera.h"
 
 #include "res_gfx.h"
-#include "res_sound.h"
 
 
 bool paused;
@@ -52,9 +51,6 @@ int main(bool hard)
     // and init map
     SYS_doVBlankProcess();
 
-    // start music
-    XGM2_play(sonic_music);
-    XGM2_fadeIn(30);
 
     // can restore default DMA buffer size
     DMA_setBufferSizeToDefault();
