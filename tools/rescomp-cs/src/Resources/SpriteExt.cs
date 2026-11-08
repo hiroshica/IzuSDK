@@ -154,8 +154,8 @@ public sealed class SprxBoxListRes : Resource
         Util.Decl(outS, outH, "SprxBoxList", Id, 2, Global);
         outS.Append("    dc.w    " + sorted.Count + "\n");
         foreach (var b in sorted)
-            outS.Append("    dc.b    " + kinds.GetValue(b.Kind) + ", " + b.Index + ", " + (b.X & 0xFF) + ", " + (b.Y & 0xFF) + ", " + b.W + ", " + b.H
-                        + "    | " + SprxKinds.EnumName(b.Kind) + " '" + (b.Name ?? "") + "' (" + b.X + "," + b.Y + " " + b.W + "x" + b.H + ")\n");
+            // no inline comment: SGDK assembles with -x assembler-with-cpp -Wa,--bitwise-or ('|' is not a comment there)
+            outS.Append("    dc.b    " + kinds.GetValue(b.Kind) + ", " + b.Index + ", " + (b.X & 0xFF) + ", " + (b.Y & 0xFF) + ", " + b.W + ", " + b.H + "\n");
         outS.Append("\n");
     }
 }
@@ -216,8 +216,7 @@ public sealed class SprxFrameRes : Resource
         }
         // FrameVDPSpriteExt[]: tile offset / flip / palette
         foreach (var s in Sprites)
-            outS.Append("    dc.w    " + s.ExtAttr + "    | ext: tile+" + (s.ExtAttr & 0x7FF)
-                        + ((s.ExtAttr & 0x800) != 0 ? " H" : "") + ((s.ExtAttr & 0x1000) != 0 ? " V" : "") + " pal+" + ((s.ExtAttr >> 13) & 3) + "\n");
+            outS.Append("    dc.w    " + s.ExtAttr + "\n");
         outS.Append("\n");
     }
 }
