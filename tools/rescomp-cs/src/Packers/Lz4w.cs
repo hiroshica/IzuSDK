@@ -1,4 +1,4 @@
-namespace Sgdk.Rescomp.Packers;
+namespace Isdk.Rescomp.Packers;
 
 /// <summary>
 /// LZ4W 圧縮 (SGDK の tools/lz4w の LZ4W.java をそのまま移したもの)。

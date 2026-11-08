@@ -86,7 +86,7 @@ extern u16* dmaDataBuffer;
  *  \brief
  *      Initialize the DMA queue sub system with default settings.
  *
- *      SGDK automatically call this method on hard reset so you don't need to call it again unless
+ *      ISDK automatically call this method on hard reset so you don't need to call it again unless
  *      you want to change the default parameters in which casse you should use #DMA_initEx(..)
  *
  * \see #DMA_initEx(..)
@@ -106,7 +106,7 @@ void DMA_init(void);
  *      Size of the buffer (in bytes) to store temporary data that will be transferred through the DMA queue (0 = default size = 8192 on NTSC and 14336 on PAL).<br>
  *      The buffer should be big enough to contains all temporary that you need to store before next #DMA_flushQueue() call.
  *
- *      SGDK automatically call this method on hard reset so you don't need to call it again unless
+ *      ISDK automatically call this method on hard reset so you don't need to call it again unless
  *      you want to change the default parameters.
  *
  * \see #DMA_setIgnoreOverCapacity(..)

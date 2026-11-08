@@ -1,4 +1,4 @@
-namespace Sgdk.Rescomp.Types;
+namespace Isdk.Rescomp.Types;
 
 /// <summary>8x8 のタイル (Java 版の type.Tile)。data は 1 要素に 4bpp の画素 8 つ。</summary>
 public sealed class Tile : IComparable<Tile>

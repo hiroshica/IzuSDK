@@ -1,8 +1,8 @@
-using Sgdk.Rescomp.Imaging;
-using Sgdk.Rescomp.Resources;
-using Sgdk.Rescomp.Types;
+using Isdk.Rescomp.Imaging;
+using Isdk.Rescomp.Resources;
+using Isdk.Rescomp.Types;
 
-namespace Sgdk.Rescomp.Processors;
+namespace Isdk.Rescomp.Processors;
 
 public sealed class SpriteProcessor : IProcessor
 {

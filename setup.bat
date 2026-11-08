@@ -2,11 +2,11 @@
 rem SurugaCC: set up cmd.exe to use this package (surugacc, surugacc-sgdk, run68k).
 rem
 rem   setup.bat                         set up this cmd window
-rem   setup.bat C:\SGDK                 also set GDK / SGDK (the SGDK folder used by surugacc-sgdk)
-rem   setup.bat /persist [C:\SGDK]      also write to the user environment variables (new windows)
+rem   setup.bat C:\IsuSDK               also set GDK / ISDK / SGDK (the IsuSDK folder used by surugacc-sgdk)
+rem   setup.bat /persist [C:\IsuSDK]    also write to the user environment variables (new windows)
 rem   setup.bat /remove                 undo (this window and the user environment variables)
 rem
-rem Sets PATH (this folder and bin\), SURUGACC_HOME, SURUGACC (surugacc.exe) and, with an SGDK folder, GDK and SGDK.
+rem Sets PATH (this folder and bin\), SURUGACC_HOME, SURUGACC (surugacc.exe) and, with an IsuSDK folder, GDK, ISDK and SGDK (SGDK is kept for compatibility).
 rem The persistent part and the tool check are done by setup.ps1 (Windows PowerShell).
 rem This file is kept ASCII only so that cmd.exe reads it the same way in any code page.
 
@@ -40,7 +40,7 @@ goto args
 if not defined _SURUGA_SGDK goto nosgdk
 if "%_SURUGA_SGDK:~-1%"=="\" set "_SURUGA_SGDK=%_SURUGA_SGDK:~0,-1%"
 if exist "%_SURUGA_SGDK%\" goto nosgdk
-echo setup.bat: SGDK folder not found: %_SURUGA_SGDK%
+echo setup.bat: IsuSDK folder not found: %_SURUGA_SGDK%
 goto cleanup_error
 :nosgdk
 
@@ -52,6 +52,7 @@ set "PATH=%SURUGACC_HOME%;%SURUGACC_HOME%\bin;%PATH%"
 set "SURUGACC=%SURUGACC_HOME%\surugacc.exe"
 if not defined _SURUGA_SGDK goto runps
 set "GDK=%_SURUGA_SGDK%"
+set "ISDK=%_SURUGA_SGDK%"
 set "SGDK=%_SURUGA_SGDK%"
 
 :runps
@@ -69,7 +70,7 @@ set "SURUGACC_HOME="
 goto cleanup
 
 :usage
-echo usage: setup.bat [SGDK folder] [/persist]
+echo usage: setup.bat [IsuSDK folder] [/persist]
 echo        setup.bat /remove
 goto cleanup
 

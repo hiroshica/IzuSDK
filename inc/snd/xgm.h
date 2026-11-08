@@ -206,10 +206,10 @@ u8 XGM_isPlayingPCM(const u16 channel_mask);
  *      values from 64 to 255 are used for SFX
  *  \param sample
  *      Sample address, should be 256 bytes boundary aligned<br>
- *      SGDK automatically align sample resource as needed
+ *      ISDK automatically align sample resource as needed
  *  \param len
  *      Size of sample in bytes, should be a multiple of 256<br>
- *      SGDK automatically adjust resource size as needed
+ *      ISDK automatically adjust resource size as needed
  */
 void XGM_setPCM(const u8 id, const u8 *sample, const u32 len);
 /**
@@ -224,10 +224,10 @@ void XGM_setPCM(const u8 id, const u8 *sample, const u32 len);
  *      values from 64 to 255 are used for SFX
  *  \param sample
  *      Sample address, should be 256 bytes boundary aligned<br>
- *      SGDK automatically align sample resource as needed
+ *      ISDK automatically align sample resource as needed
  *  \param len
  *      Size of sample in bytes, should be a multiple of 256<br>
- *      SGDK automatically adjust resource size as needed
+ *      ISDK automatically adjust resource size as needed
  */
 void XGM_setPCMFast(const u8 id, const u8 *sample, const u32 len);
 /**
@@ -333,7 +333,7 @@ void XGM_setManualSync(const bool value);
  *  if the Z80 is stopped right at V-Int time (bus request from 68000 or DMA stall) then
  *  the V-Int can be missed by the Z80 and music timing affected.<br>
  *  To fix that issue and also to offer more flexibility the music timing should now be handled by the 68k.<br>
- *  By default this method is called automatically by SGDK at V-Int time but you can decide to handle sync
+ *  By default this method is called automatically by ISDK at V-Int time but you can decide to handle sync
  *  manually (see XGM_setManualSync(..) method).<br>
  *  When you are in manual sync you normally should call this method once per frame (in the V-Int callback for instance)
  *  but you are free to play with it to increase or decrease music tempo.<br>

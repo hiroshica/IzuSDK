@@ -1,4 +1,4 @@
-namespace Sgdk.Rescomp.Packers;
+namespace Isdk.Rescomp.Packers;
 
 /// <summary>
 /// aPLib 圧縮 (SGDK の tools/apj の APJ.java をそのまま移したもの)。

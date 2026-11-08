@@ -1,4 +1,4 @@
-// base SGDK include
+// base IsuSDK (ISDK) include
 #include <genesis.h>
 
 // file header (not really useful here but just for the example)

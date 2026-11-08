@@ -1,7 +1,7 @@
 using System.Text;
-using Sgdk.Rescomp.Packers;
+using Isdk.Rescomp.Packers;
 
-namespace Sgdk.Rescomp;
+namespace Isdk.Rescomp;
 
 /// <summary>Java 版の sgdk.rescomp.tool.Util にあたるもの。</summary>
 public static class Util

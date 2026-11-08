@@ -339,7 +339,7 @@ VoidCallback* Z80_getVIntCallback(void);
  *      You can remove current callback by passing a <i>NULL</i> pointer here.
  *
  * Vertical interrupt happen at the end of display period at the start of the vertical blank period.<br>
- * The only things that SGDK always handle from the vint callback is sound driver task as music tempo or Bitmap engine phase reset.<br>
+ * The only things that ISDK always handle from the vint callback is sound driver task as music tempo or Bitmap engine phase reset.<br>
  * It's recommended to keep your code as fast as possible as it will eat precious VBlank time, nor you should touch the VDP from your Vint callback
  * otherwise you will need to protect any VDP accesses from your main loop (which is painful).
  *

@@ -16,7 +16,7 @@
  * 0000-XXXX = tile data<br>
  * XXXX-FFFF = tilemaps & tables (H scroll table, sprite table, B/A plane and window plane).<br>
  * <br>
- * If you don't respect that you may get in troubles as SGDK expect it ;)
+ * If you don't respect that you may get in troubles as ISDK expect it ;)
  */
 
 #ifndef _VDP_H_
@@ -125,7 +125,7 @@
 
 /**
  *  \brief
- *      SGDK font length
+ *      ISDK font length
  */
 #define FONT_LENGTH             96
 #define FONT_LEN                _Pragma("GCC error \"This definition is deprecated, use FONT_LENGTH instead.\"")
@@ -397,7 +397,7 @@ u8   VDP_getReg(u16 reg);
  *  \param reg
  *      Register number we want to set value.
  *      Note that setting bit 7 of register number (reg | 0x80) allows the value to be written to the VDP
- *      without being 'cached' in the SGDK register array so VDP_getReg(reg) will return previous value.
+ *      without being 'cached' in the ISDK register array so VDP_getReg(reg) will return previous value.
  *  \param value
  *      value to set.
  */
@@ -572,7 +572,7 @@ u8 VDP_getDMAEnabled(void);
  *  \brief
  *      Set DMA enabled state.
  *
- *  Note that by default SGDK always enable DMA (there is no reason to disable it)
+ *  Note that by default ISDK always enable DMA (there is no reason to disable it)
  */
 void VDP_setDMAEnabled(bool value);
 /**

@@ -1,7 +1,7 @@
 {
     "configurations": [
         {
-            "name": "sgdk",
+            "name": "isdk",
             "includePath": [
                 "${workspaceFolder}/../../inc",
                 "${workspaceFolder}/../../res",

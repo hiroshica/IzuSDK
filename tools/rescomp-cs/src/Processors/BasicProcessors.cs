@@ -1,6 +1,6 @@
-using Sgdk.Rescomp.Resources;
+using Isdk.Rescomp.Resources;
 
-namespace Sgdk.Rescomp.Processors;
+namespace Isdk.Rescomp.Processors;
 
 public sealed class AlignProcessor : IProcessor
 {

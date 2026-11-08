@@ -1,15 +1,15 @@
 ﻿<#
 .SYNOPSIS
-    この SGDK (フォーク) のプロジェクトを SurugaCC でメガドライブの ROM にする。
+    IsuSDK (ISDK。SGDK から派生) のプロジェクトを SurugaCC でメガドライブの ROM にする。
 
 .DESCRIPTION
-    SurugaCC の tools/sgdk.ps1 をもとにした、このリポジトリ用の入口 (このフォークのビルドはこれだけ)。
+    SurugaCC の tools/sgdk.ps1 をもとにした、このリポジトリ用の入口 (IsuSDK のビルドはこれだけ)。
     本家 SGDK の makefile.gen / makelib.gen と同じ手順を surugacc で行う。
 
-    - SGDK は既定でこのスクリプトの一つ上のフォルダ (このリポジトリ) を使う。
+    - IsuSDK は既定でこのスクリプトの一つ上のフォルダ (このリポジトリ) を使う。
     - リソースの変換は C# 版の rescomp (tools/rescomp-cs。dotnet があれば surugacc/out/rescomp に自動でビルドする) を使う。
       まだ C# に移していない種類のリソースがあるときや dotnet がないときは bin/rescomp.jar を使う (java が必要)。
-      環境変数 SGDK_RESCOMP=java で、いつも rescomp.jar を使う。
+      環境変数 ISDK_RESCOMP=java (旧名 SGDK_RESCOMP も可) で、いつも rescomp.jar を使う。
     - ROM の大きさとチェックサムの調整 (sizebnd.jar と同じ計算) はこのスクリプトの中で行う。
     - Z80 のドライバ (*.s80) は sjasm でアセンブルする (Windows では bin/sjasm.exe、それ以外では PATH の sjasm)。
 
@@ -25,11 +25,11 @@
 .PARAMETER Project
     プロジェクトのフォルダ。省くと今のフォルダ。
 
-.PARAMETER Sgdk
-    SGDK のフォルダ。省くとこのリポジトリ。
+.PARAMETER Isdk
+    IsuSDK のフォルダ。省くとこのリポジトリ。旧名 -Sgdk も使える。
 
 .PARAMETER LibOnly
-    SGDK のライブラリだけを作る。
+    IsuSDK のライブラリだけを作る。
 
 .PARAMETER g
     デバッグ情報を付ける (out/rom.out を gdb-multiarch で読める)。
@@ -40,8 +40,9 @@
 .PARAMETER j
     ライブラリを j 個ずつ並べてコンパイルする (既定は CPU の数)。
 
-.PARAMETER SgdkLib
+.PARAMETER IsdkLib
     ライブラリの .o を置くフォルダ (既定は surugacc/out/lib-O2 など。-g なら surugacc/out/lib-debug-O2)。
+    環境変数 ISDK_LIB (旧名 SGDK_LIB) でも指定できる。旧名 -SgdkLib も使える。
 
 .EXAMPLE
     pwsh surugacc/build.ps1 sample/basics/hello-world
@@ -52,12 +53,12 @@
 #>
 param(
     [Parameter(Position = 0)][string]$Project = '.',
-    [string]$Sgdk,
+    [Alias('Sgdk')][string]$Isdk,
     [switch]$g,
     [switch]$LibOnly,
     [Alias('O')][int]$Opt = 2,
     [int]$j = [Environment]::ProcessorCount,
-    [string]$SgdkLib = $env:SGDK_LIB
+    [Alias('SgdkLib')][string]$IsdkLib = $(if ($env:ISDK_LIB) { $env:ISDK_LIB } else { $env:SGDK_LIB })
 )
 $ErrorActionPreference = 'Stop'
 
@@ -101,33 +102,34 @@ function java-jar {
 }
 Set-SurugaCC
 
-if (-not $Sgdk) { $Sgdk = Split-Path -Parent $PSScriptRoot }
-$gdk = (Resolve-Path $Sgdk).Path
-# SurugaCC の setup.bat で設定した GDK (SGDK の場所) が、このリポジトリと違うときは知らせる (使うのはこのリポジトリ)
-$gdkEnv = if ($env:GDK) { $env:GDK } else { $env:SGDK }
+if (-not $Isdk) { $Isdk = Split-Path -Parent $PSScriptRoot }
+$gdk = (Resolve-Path $Isdk).Path
+# SurugaCC の setup.bat で設定した GDK (IsuSDK の場所) が、このリポジトリと違うときは知らせる (使うのはこのリポジトリ)
+$gdkEnv = if ($env:GDK) { $env:GDK } elseif ($env:ISDK) { $env:ISDK } else { $env:SGDK }
 if ($gdkEnv -and (Test-Path -LiteralPath $gdkEnv) -and (Resolve-Path -LiteralPath $gdkEnv).Path.TrimEnd('\', '/') -ne $gdk.TrimEnd('\', '/')) {
     Write-Warning "環境変数 GDK ($gdkEnv) はこのリポジトリ ($gdk) と違います。ここでは $gdk を使います (setup.bat <このリポジトリ> で GDK を合わせられます)"
 }
 $proj = (Resolve-Path $Project).Path
 $debug = @(if ($g) { '-g' })
-$lib = if ($SgdkLib) { $SgdkLib } else { Join-Path $PSScriptRoot "out/lib$(if ($g) { '-debug' })$(if ($Opt -gt 0) { "-O$Opt" })" }
+$lib = if ($IsdkLib) { $IsdkLib } else { Join-Path $PSScriptRoot "out/lib$(if ($g) { '-debug' })$(if ($Opt -gt 0) { "-O$Opt" })" }
 if (-not (Test-Path "$gdk/bin/rescomp.jar")) {
-    throw "build.ps1: $gdk/bin/rescomp.jar がありません (SGDK のフォルダを確かめてください)"
+    throw "build.ps1: $gdk/bin/rescomp.jar がありません (IsuSDK のフォルダを確かめてください)"
 }
 
-# SGDK の makefile.gen / makelib.gen と同じオプション (警告などのオプションは surugacc では意味がないので省く)
+# 本家 SGDK の makefile.gen / makelib.gen と同じオプション (警告などのオプションは surugacc では意味がないので省く)
 $CFLAGS = @('--target', 'megadrive', '-m68000', "-O$Opt", '-fno-builtin', '-fms-extensions', '-ffunction-sections', '-fdata-sections') + $debug
 if ($g) { $CFLAGS += '-DDEBUG=1' }
 $AFLAGS = @('--target', 'megadrive', '-m68000', '-x', 'assembler-with-cpp', '-Wa,--register-prefix-optional,--bitwise-or') + $debug
 
 # ---- rescomp: C# 版 (tools/rescomp-cs) を使い、まだ C# に移していない種類があれば rescomp.jar で作り直す
-# 環境変数 SGDK_RESCOMP=java で、いつも rescomp.jar を使う
+# 環境変数 ISDK_RESCOMP=java (旧名 SGDK_RESCOMP) で、いつも rescomp.jar を使う
+$script:UseJavaRescomp = ($env:ISDK_RESCOMP -eq 'java') -or ($env:SGDK_RESCOMP -eq 'java')
 $script:RescompCsChecked = $false
 $script:RescompCs = $null
 function Get-RescompCs {
     if ($script:RescompCsChecked) { return $script:RescompCs }
     $script:RescompCsChecked = $true
-    if ($env:SGDK_RESCOMP -eq 'java') { return $null }
+    if ($script:UseJavaRescomp) { return $null }
     $src = Join-Path $gdk 'tools/rescomp-cs/src'
     if (-not (Test-Path -LiteralPath (Join-Path $src 'RescompCs.csproj'))) { return $null }
     $outDir = Join-Path $PSScriptRoot 'out/rescomp'
@@ -160,7 +162,7 @@ $script:Xgm2toolCs = $null
 function Get-Xgm2toolCs {
     if ($script:Xgm2toolCsChecked) { return $script:Xgm2toolCs }
     $script:Xgm2toolCsChecked = $true
-    if ($env:SGDK_RESCOMP -eq 'java') { return $null }
+    if ($script:UseJavaRescomp) { return $null }
     $src = Join-Path $gdk 'tools/xgm2tool-cs/src'
     if (-not (Test-Path -LiteralPath (Join-Path $src 'Xgm2Tool.csproj'))) { return $null }
     $outDir = Join-Path $PSScriptRoot 'out/xgm2tool'
@@ -187,11 +189,12 @@ function Get-Xgm2toolCs {
 function Invoke-Rescomp {
     $dll = Get-RescompCs
     if ($dll) {
-        # xgmtool / xgm2tool.jar は SGDK の bin にある (Java 版は rescomp.jar の隣を見る)
-        $env:SGDK_BIN = "$gdk/bin"
+        # xgmtool / xgm2tool.jar は IsuSDK の bin にある (Java 版は rescomp.jar の隣を見る)
+        $env:ISDK_BIN = "$gdk/bin"
         # XGM2 は C# 版 xgm2tool を使う (対応していない指定のときは rescomp が xgm2tool.jar に切り替える)
         $x2 = Get-Xgm2toolCs
-        if ($x2) { $env:SGDK_XGM2TOOL = $x2 } else { Remove-Item Env:SGDK_XGM2TOOL -ErrorAction SilentlyContinue }
+        Remove-Item Env:SGDK_XGM2TOOL -ErrorAction SilentlyContinue
+        if ($x2) { $env:ISDK_XGM2TOOL = $x2 } else { Remove-Item Env:ISDK_XGM2TOOL -ErrorAction SilentlyContinue }
         & dotnet $dll @args
         if ($LASTEXITCODE -eq 0) { return }
         if ($LASTEXITCODE -ne 3) { throw "build.ps1: rescomp (C#) $($args -join ' ') が失敗しました (終了コード $LASTEXITCODE)" }
@@ -221,16 +224,16 @@ function Get-RelativeFiles([string]$Dir, [string]$Sub, [string]$Filter, [string[
         Sort-Ordinal
 }
 
-# Z80 のアセンブラ sjasm (SGDK の makelib.gen と同じもの)
+# Z80 のアセンブラ sjasm (本家 SGDK の makelib.gen と同じもの)
 function Get-Sjasm {
     if ($IsWindows -and (Test-Path -LiteralPath "$gdk/bin/sjasm.exe")) { return "$gdk/bin/sjasm.exe" }
     $c = Get-Command sjasm -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
     if ($c) { return $c.Source }
-    throw ('build.ps1: Z80 のアセンブラ sjasm が見つかりません。Windows では <SGDK>/bin/sjasm.exe を使います。' +
+    throw ('build.ps1: Z80 のアセンブラ sjasm が見つかりません。Windows では <IsuSDK>/bin/sjasm.exe を使います。' +
            'Linux・macOS では tools/sjasm/src で make して、できた sjasm を PATH に置いてください')
 }
 
-# SGDK の bintos と同じ: バイナリ $Bin から、$OutBase.s (.rodata の dc.w の並び) と $OutBase.h (extern const u8 名前[大きさ]) を作る
+# 本家 SGDK の bintos と同じ: バイナリ $Bin から、$OutBase.s (.rodata の dc.w の並び) と $OutBase.h (extern const u8 名前[大きさ]) を作る
 function Convert-BinToS([string]$Bin, [string]$OutBase) {
     # [IO.File] は PowerShell の今のフォルダ (Push-Location) ではなくプロセスのフォルダを基準にするので、フルパスにする
     $Bin = [IO.Path]::GetFullPath($Bin, (Get-Location).Path)
@@ -274,7 +277,7 @@ function Build-S80([string]$Src, [string]$OutBase, [string[]]$IncDirs) {
     Convert-BinToS "$OutBase.o80" $OutBase
 }
 
-# SGDK の sizebnd.jar (-sizealign $Align -checksum) と同じ: ROM の大きさを $Align の倍数にし (0 で埋める)、
+# 本家 SGDK の sizebnd.jar (-sizealign $Align -checksum) と同じ: ROM の大きさを $Align の倍数にし (0 で埋める)、
 # ヘッダの 0x18E にチェックサム (ROM 全体を 32 ビットずつ XOR し、上下 16 ビットを XOR したもの) を書く
 function Set-RomSizeAndChecksum([string]$Rom, [int]$Align = 131072) {
     $Rom = [IO.Path]::GetFullPath($Rom, (Get-Location).Path)
@@ -300,7 +303,7 @@ $lib = (Resolve-Path $lib).Path
 $gen = Join-Path $lib 'gen'
 New-Item -ItemType Directory -Force "$gen/res" | Out-Null
 $genAsm = [ordered]@{}
-# res/libres.rs と res/libres.h (makelib.gen と同じく SGDK のフォルダで rescomp を動かす)
+# res/libres.rs と res/libres.h (makelib.gen と同じく IsuSDK のフォルダで rescomp を動かす)
 if (Test-Stale "$gen/res/libres.rs" "$gdk/res/libres.res") {
     Push-Location $gdk
     try { Invoke-Rescomp res/libres.res "$gen/res/libres.rs" } finally { Pop-Location }
@@ -344,7 +347,7 @@ foreach ($o in @(Get-ChildItem $lib -File -Filter '*.o')) {
     }
 }
 if ($jobs.Count -gt 0) {
-    Write-Host "SGDK のライブラリをコンパイル ($($jobs.Count) 個) → $lib"
+    Write-Host "IsuSDK のライブラリをコンパイル ($($jobs.Count) 個) → $lib"
     $exe = $script:CcExe; $pre = $script:CcPre
     $failed = $jobs | ForEach-Object -ThrottleLimit ([Math]::Max(1, $j)) -Parallel {
         $a = $_; $exe = $using:exe; $pre = $using:pre
@@ -354,7 +357,7 @@ if ($jobs.Count -gt 0) {
     if ($failed) { throw "build.ps1: コンパイルに失敗: $($failed -join ', ')" }
 }
 if ($LibOnly) {
-    Write-Host "SGDK のライブラリを作りました: $lib"
+    Write-Host "IsuSDK のライブラリを作りました: $lib"
     return
 }
 
@@ -362,7 +365,7 @@ if ($LibOnly) {
 $projSources = @(Get-ChildItem -LiteralPath $proj -File -Filter '*.c') +
                @(if (Test-Path -LiteralPath (Join-Path $proj 'src')) { Get-ChildItem -LiteralPath (Join-Path $proj 'src') -Recurse -File -Filter '*.c' })
 if ($projSources.Count -eq 0) {
-    Write-Host "SGDK のライブラリを作りました: $lib"
+    Write-Host "IsuSDK のライブラリを作りました: $lib"
     Write-Host "$proj には C のソース (*.c か src/*.c) がないので、プロジェクトはビルドしません。"
     Write-Host "  例: pwsh $PSCommandPath $(Join-Path $gdk 'sample/basics/hello-world')"
     return
@@ -383,7 +386,7 @@ try {
         }
     }
     $INC = @('-I.', '-Iinc', '-Isrc', '-Ires', '-Iout', "-I$gdk/inc", "-I$gdk/res", "-I$gen")
-    # ROM のヘッダはプロジェクトの src/rom_header.c (なければ SGDK のものを写す)。sega.s は out/rom_header.bin を .incbin する
+    # ROM のヘッダはプロジェクトの src/rom_header.c (なければ IsuSDK のものを写す)。sega.s は out/rom_header.bin を .incbin する
     New-Item -ItemType Directory -Force src | Out-Null
     if (-not (Test-Path src/rom_header.c)) { Copy-Item "$gdk/src/boot/rom_header.c" src/ }
     cc cc @CFLAGS @INC -c src/rom_header.c -o out/rom_header.o

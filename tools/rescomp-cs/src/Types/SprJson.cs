@@ -1,11 +1,11 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Sgdk.Rescomp.Types;
+namespace Isdk.Rescomp.Types;
 
 // [EXT] SPRX: JSON sprite format (version 4) used by the SPRJ resource.
 // "attributes" (parts / frames / animations / boxes) is user-defined data for future extensions: ignored for now.
-// "loop" is an editor-side setting: ignored (SGDK animations always loop to frame 0).
+// "loop" is an editor-side setting: ignored (ISDK animations always loop to frame 0).
 
 public sealed class SprJsonDocument
 {

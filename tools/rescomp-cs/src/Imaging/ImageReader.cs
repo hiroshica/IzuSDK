@@ -1,7 +1,7 @@
 using System.Buffers.Binary;
 using System.IO.Compression;
 
-namespace Sgdk.Rescomp.Imaging;
+namespace Isdk.Rescomp.Imaging;
 
 /// <summary>
 /// 読み込んだ画像。Java の ImageIO で読んだときと同じ値になるようにしてある。

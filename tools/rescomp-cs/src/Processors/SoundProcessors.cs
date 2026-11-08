@@ -1,7 +1,7 @@
 using System.Diagnostics;
-using Sgdk.Rescomp.Resources;
+using Isdk.Rescomp.Resources;
 
-namespace Sgdk.Rescomp.Processors;
+namespace Isdk.Rescomp.Processors;
 
 public sealed class WavProcessor : IProcessor
 {
@@ -169,17 +169,20 @@ public sealed class Xgm2Processor : IProcessor
     }
 }
 
-/// <summary>Java 版と同じように、SGDK の bin にある xgmtool / xgm2tool.jar を呼ぶ。</summary>
+/// <summary>Java 版と同じように、IsuSDK の bin にある xgmtool / xgm2tool.jar を呼ぶ。</summary>
 static class ExternalTools
 {
-    /// <summary>SGDK の bin フォルダ: 環境変数 SGDK_BIN、なければ GDK / SGDK の下の bin、なければこの dll の場所。</summary>
+    /// <summary>IsuSDK の bin フォルダ: 環境変数 ISDK_BIN (旧名 SGDK_BIN)、なければ GDK / ISDK / SGDK の下の bin、なければこの dll の場所。</summary>
     public static string ToolDir
     {
         get
         {
-            var bin = Environment.GetEnvironmentVariable("SGDK_BIN");
-            if (!string.IsNullOrEmpty(bin)) return bin;
-            foreach (var name in new[] { "GDK", "SGDK" })
+            foreach (var name in new[] { "ISDK_BIN", "SGDK_BIN" })
+            {
+                var bin = Environment.GetEnvironmentVariable(name);
+                if (!string.IsNullOrEmpty(bin)) return bin;
+            }
+            foreach (var name in new[] { "GDK", "ISDK", "SGDK" })
             {
                 var gdk = Environment.GetEnvironmentVariable(name);
                 if (!string.IsNullOrEmpty(gdk) && Directory.Exists(Path.Combine(gdk, "bin")))
@@ -205,14 +208,15 @@ static class ExternalTools
     }
 
     /// <summary>
-    /// C# 版 xgm2tool (tools/xgm2tool-cs) の dll。環境変数 SGDK_XGM2TOOL で指す。
+    /// C# 版 xgm2tool (tools/xgm2tool-cs) の dll。環境変数 ISDK_XGM2TOOL (旧名 SGDK_XGM2TOOL) で指す。
     /// ないときや、C# 版が対応していない指定 (-ac など。終了コード 3) のときは xgm2tool.jar を使う。
     /// </summary>
     static string Xgm2toolCs
     {
         get
         {
-            var dll = Environment.GetEnvironmentVariable("SGDK_XGM2TOOL");
+            var dll = Environment.GetEnvironmentVariable("ISDK_XGM2TOOL");
+            if (string.IsNullOrEmpty(dll)) dll = Environment.GetEnvironmentVariable("SGDK_XGM2TOOL");
             return !string.IsNullOrEmpty(dll) && File.Exists(dll) ? dll : null;
         }
     }

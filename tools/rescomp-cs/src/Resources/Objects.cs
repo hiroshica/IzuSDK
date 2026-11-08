@@ -1,7 +1,7 @@
 using System.Text;
-using Sgdk.Rescomp.Types;
+using Isdk.Rescomp.Types;
 
-namespace Sgdk.Rescomp.Resources;
+namespace Isdk.Rescomp.Resources;
 
 /// <summary>TMX のオブジェクトの配列 (Java 版の resource.Objects)。</summary>
 public sealed class Objects : Resource

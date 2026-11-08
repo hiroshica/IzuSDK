@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace Sgdk.Rescomp.Resources;
+namespace Isdk.Rescomp.Resources;
 
 /// <summary>ALIGN: これより後ろの far な BIN データの番地をそろえる。</summary>
 public sealed class Align : Resource

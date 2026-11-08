@@ -4,7 +4,7 @@
  *  \author Stephane Dallongeville
  *  \date 08/2011
  *
- * This unit contains SGDK initialization / reset methods, IRQ callbacks and others system stuff.
+ * This unit contains ISDK initialization / reset methods, IRQ callbacks and others system stuff.
  */
 
 #ifndef _SYS_H_
@@ -208,11 +208,11 @@ void SYS_hardReset(void);
  *  \return FALSE if process was canceled because the method was called from V-Int (vertical interrupt) callback
  *      in which case we exit the function as V-Int will be triggered immediately.<br>
  *
- * Do all the SGDK VBlank process.<br>
+ * Do all the ISDK VBlank process.<br>
  * Some specific processing should be done during the Vertical Blank period as the VDP is idle at this time.
  * This is always where we should do all VDP data transfer (using the DMA preferably) but we can also do the processes which
  * has to be done at a frame basis (joypad polling, sound driver sync/update..)<br>
- * In the case of SGDK, calling this method will actually do the following tasks:<br>
+ * In the case of ISDK, calling this method will actually do the following tasks:<br>
  * - flush the DMA queue<br>
  * - process asynchronous palette fading operation<br>
  * - joypad polling<br>
@@ -239,11 +239,11 @@ bool SYS_doVBlankProcess(void);
  *      and the method was called from V-Int (vertical interrupt) callback in which case we exit the function
  *      as V-Int will be triggered immediately.<br>
  *
- * Wait for Vblank and does all the SGDK VBlank process.<br>
+ * Wait for Vblank and does all the ISDK VBlank process.<br>
  * Some specific processing should be done during the Vertical Blank period as the VDP is idle at this time.
  * This is always where we should do all VDP data transfer (using the DMA preferably) but we can also do the processes which
  * has to be done at a frame basis (joypad polling, sound driver sync/update..)<br>
- * In the case of SGDK, calling this method will actually do the following tasks:<br>
+ * In the case of ISDK, calling this method will actually do the following tasks:<br>
  * - flush the DMA queue<br>
  * - process asynchronous palette fading operation<br>
  * - joypad polling<br>
@@ -256,7 +256,7 @@ bool SYS_doVBlankProcessEx(VBlankProcessTime processTime);
  *  \brief
  *      End the current frame (alias for #SYS_doVBlankProcess(void)).
  *
- *  End the current frame and does all the internal SGDK VBlank process (DMA flush, VDP data upload, async palette fade, scroll update..)
+ *  End the current frame and does all the internal ISDK VBlank process (DMA flush, VDP data upload, async palette fade, scroll update..)
  *
  *  \see SYS_doVBlankProcess(void)
  */
@@ -322,7 +322,7 @@ u16 SYS_getAndSetInterruptMaskLevel(u16 value);
  *
  * This method is used to temporary disable interrupts to protect some processes and should always be followed by SYS_enableInts().<br>
  * You need to protect against interrupts any processes than can be perturbed / corrupted by the interrupt callback code (IO ports access in general but not only).<br>
- * Now by default SGDK doesn't do anything armful in its interrupts handlers (except with the Bitmap engine) so it's not necessary to protect from interrupts by default
+ * Now by default ISDK doesn't do anything armful in its interrupts handlers (except with the Bitmap engine) so it's not necessary to protect from interrupts by default
  * but you may need it if your interrupts callback code does mess with VDP for instance.<br>
  * Note that you can nest #SYS_disableInts / #SYS_enableInts() calls.
  *
@@ -350,7 +350,7 @@ void SYS_enableInts(void);
  *
  * Vertical blank period starts right at the end of display period.<br>
  * This period is usually used to prepare next frame data (refresh sprites, scrolling ...).<br>
- * SGDK handle that in the #SYS_doVBlankProcess() method and will call the user 'Vertical Blank' from this method after all major tasks.<br>
+ * ISDK handle that in the #SYS_doVBlankProcess() method and will call the user 'Vertical Blank' from this method after all major tasks.<br>
  * It's recommended to use the 'Vertical Blank' callback instead of the 'VInt' callback if you need to do some VDP accesses.
  *
  * \see SYS_setVIntCallback(VoidCallback *CB);
@@ -367,8 +367,8 @@ void SYS_setVBlankCallback(VoidCallback *CB);
  *
  * Vertical interrupt happen at the end of display period at the start of the vertical blank period.<br>
  * This period is usually used to prepare next frame data (refresh sprites, scrolling ...) though now
- * SGDK handle most of these process using #SYS_doVBlankProcess() so you can control it manually (do it from main loop or put it in Vint callback).<br>
- * The only things that SGDK always handle from the vint callback is the XGM sound driver music tempo and Bitmap engine phase reset.<br>
+ * ISDK handle most of these process using #SYS_doVBlankProcess() so you can control it manually (do it from main loop or put it in Vint callback).<br>
+ * The only things that ISDK always handle from the vint callback is the XGM sound driver music tempo and Bitmap engine phase reset.<br>
  * It's recommended to keep your code as fast as possible as it will eat precious VBlank time, nor you should touch the VDP from your Vint callback
  * otherwise you will need to protect any VDP accesses from your main loop (which is painful), use the SYS_setVBlankCallback(..) instead for that.
  *

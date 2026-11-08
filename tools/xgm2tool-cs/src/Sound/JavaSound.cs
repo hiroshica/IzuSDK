@@ -1,4 +1,4 @@
-namespace Sgdk.Xgm2Tool.Sound;
+namespace Isdk.Xgm2Tool.Sound;
 
 /// <summary>
 /// xgm2tool が PCM のサンプリング周波数を変えるときに使う Java Sound (javax.sound.sampled) の変換を、同じ結果になるように移したもの。

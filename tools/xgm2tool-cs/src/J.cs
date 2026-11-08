@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Text;
 
-namespace Sgdk.Xgm2Tool;
+namespace Isdk.Xgm2Tool;
 
 /// <summary>Java の標準ライブラリと同じ動きをする小物。</summary>
 public static class J

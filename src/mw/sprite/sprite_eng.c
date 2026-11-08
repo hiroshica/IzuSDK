@@ -129,7 +129,7 @@ NO_INLINE void SPR_initEx(u16 vramSize)
     // [V1] VDP tilemap / table move --> defrag sprite VRAM (was a direct call from vdp.c)
     SCHED_setEventHandler(SCHED_EVENT_VRAM_LAYOUT, SPR_defragVRAM);
 
-    // store allocated VRAM size to let SGDK know about it
+    // store allocated VRAM size to let ISDK know about it
     spriteVramSize = vramSize ? vramSize : 420;
     // and create a VRAM region for sprite tile allocation
     VRAM_createRegion(&vram, TILE_SPRITE_INDEX, spriteVramSize);

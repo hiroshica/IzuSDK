@@ -1,10 +1,10 @@
 using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
-using Sgdk.Rescomp.Imaging;
-using Sgdk.Rescomp.Types;
+using Isdk.Rescomp.Imaging;
+using Isdk.Rescomp.Types;
 
-namespace Sgdk.Rescomp.Resources;
+namespace Isdk.Rescomp.Resources;
 
 // [EXT] SPRX: resources for the SPRJ resource type (JSON sprite -> extended frames, see inc/sprx.h).
 
@@ -154,7 +154,7 @@ public sealed class SprxBoxListRes : Resource
         Util.Decl(outS, outH, "SprxBoxList", Id, 2, Global);
         outS.Append("    dc.w    " + sorted.Count + "\n");
         foreach (var b in sorted)
-            // no inline comment: SGDK assembles with -x assembler-with-cpp -Wa,--bitwise-or ('|' is not a comment there)
+            // no inline comment: ISDK (like SGDK) assembles with -x assembler-with-cpp -Wa,--bitwise-or ('|' is not a comment there)
             outS.Append("    dc.b    " + kinds.GetValue(b.Kind) + ", " + b.Index + ", " + (b.X & 0xFF) + ", " + (b.Y & 0xFF) + ", " + b.W + ", " + b.H + "\n");
         outS.Append("\n");
     }

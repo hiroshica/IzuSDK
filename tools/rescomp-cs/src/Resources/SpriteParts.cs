@@ -1,9 +1,9 @@
 using System.Text;
-using Sgdk.Rescomp.Imaging;
-using Sgdk.Rescomp.Tools;
-using Sgdk.Rescomp.Types;
+using Isdk.Rescomp.Imaging;
+using Isdk.Rescomp.Tools;
+using Isdk.Rescomp.Types;
 
-namespace Sgdk.Rescomp.Resources;
+namespace Isdk.Rescomp.Resources;
 
 /// <summary>フレームの中の 1 つの VDP スプライト (Java 版の resource.internal.VDPSprite)。</summary>
 public sealed class VDPSprite : Resource

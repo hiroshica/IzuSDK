@@ -1,7 +1,7 @@
-using Sgdk.Rescomp.Imaging;
-using Sgdk.Rescomp.Types;
+using Isdk.Rescomp.Imaging;
+using Isdk.Rescomp.Types;
 
-namespace Sgdk.Rescomp.Tools;
+namespace Isdk.Rescomp.Tools;
 
 /// <summary>
 /// スプライトのフレームを VDP スプライト (最大 4x4 タイル) に分ける (Java 版の tool.SpriteCutter)。

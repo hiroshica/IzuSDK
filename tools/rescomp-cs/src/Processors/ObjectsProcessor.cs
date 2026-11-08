@@ -1,16 +1,16 @@
-using Sgdk.Rescomp.Resources;
-using Sgdk.Rescomp.Types;
+using Isdk.Rescomp.Resources;
+using Isdk.Rescomp.Types;
 
-namespace Sgdk.Rescomp.Processors;
+namespace Isdk.Rescomp.Processors;
 
 public sealed class ObjectsProcessor : IProcessor
 {
     public string Id => "OBJECTS";
 
     /// <summary>"name:type;name:type" を、書いた順のままの一覧にする。</summary>
-    public static List<(string Name, SGDKObjectType Type)> BuildFieldDefs(string fieldDefs)
+    public static List<(string Name, IsdkObjectType Type)> BuildFieldDefs(string fieldDefs)
     {
-        var result = new List<(string, SGDKObjectType)>();
+        var result = new List<(string, IsdkObjectType)>();
         foreach (var def in JavaCompat.SplitJava(fieldDefs, ";"))
         {
             var values = JavaCompat.SplitJava(def, ":");
@@ -24,7 +24,7 @@ public sealed class ObjectsProcessor : IProcessor
                 throw new Exception("Error: invalid field definition '" + def + "', field name is empty");
             if (fieldType.Length == 0)
                 throw new Exception("Error: invalid field definition '" + def + "', field type is empty");
-            if (!ObjectTypes.TryParseSgdk(fieldType, out var t))
+            if (!ObjectTypes.TryParseIsdk(fieldType, out var t))
                 throw new Exception("Error: invalid field definition '" + def + "', unknow field type");
 
             // LinkedHashMap.put と同じく、同じ名前は最初の位置のまま型だけ置き換える
@@ -48,7 +48,7 @@ public sealed class ObjectsProcessor : IProcessor
             Console.WriteLine("tmx_file        path of the input TMX file (TMX Tiled file)");
             Console.WriteLine("layer_id        object group/layer name we want to extract object from.");
             Console.WriteLine("field_defs      name and type of fields we want to extract (also define the order of extraction) in <name>:<type> format.");
-            Console.WriteLine("                    Field type can be any of the usual SGDK base type: u8, s8, u16, s16, u32, s32, f16, f32, bool, string, object");
+            Console.WriteLine("                    Field type can be any of the usual ISDK base type: u8, s8, u16, s16, u32, s32, f16, f32, bool, string, object");
             Console.WriteLine("                    Some examples of 'field_defs' declaration:");
             Console.WriteLine("                        \"type:u16;name:string;x:f32;y:f32;tileindex:u32\"");
             Console.WriteLine("                        \"type:u16;power:s8;visible:bool\"");
