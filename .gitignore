@@ -21,6 +21,8 @@
 **/.settings/**
 **/out
 **/res/*.h
+# fz2: MML のビルドで作るが、SndBase がないと作れないので git に入れておく
+!sample/fz2/res/mdsseq.h
 !**/out/rom.bin
 **/symbol.txt
 **/rom_head.bin
