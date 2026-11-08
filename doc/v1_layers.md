@@ -21,7 +21,7 @@ v2 の C++ namespace 化は含みません（下の「計画書と変えたと�
 |---|---|
 | `src/hal/` | `hal_cpu.c`（新規）, `hal_vdp.c`（新規）, `hal_vdp_bulk_a.s`（新規）, `sys_a.s`, `error_a.s`, `kdebug.s`, `mapper.c`, `sram.c`, `sram_a.s`, `ym2612.c`, `psg.c`, `z80_ctrl.c`, `dma_a.s`, `vdp_tile_a.s` |
 | `src/mw/` | `sched.c`（新規）, `sys.c`, `vdp.c`, `vdp_bg.c`, `vdp_spr.c`, `vdp_tile.c`, `dma.c`, `pal.c`, `vram.c`, `joy.c`, `timer.c`, `map.c`, `bmp.c`, `bmp_a.s`, `task.s`, `snd/`（`snd/z80_driver.c` は新規） |
-| `src/mw/sprite/` | `sprite_eng.c`, `sprite_eng_legacy.c`, `sprx.c`（以前の `src/ext/sprite_eng_ext.c`）, `sprite_port.c`（新規） |
+| `src/mw/sprite/` | `sprite_eng.c`, `sprx.c`（以前の `src/ext/sprite_eng_ext.c`）, `sprite_port.c`（新規） |
 | `src/util/` | `memory.c`, `memory_a.s`, `string.c`, `maths.c`, `maths3D.c`, `maths3D_a.s`, `tab_*.c`, `tools.c`, `tools_a.s`, `pool.c`, `object.c`, `types.c` |
 
 ## HAL（inc/hal/）
@@ -95,7 +95,7 @@ SurugaCC（-O2）で `sample/game/sonic` を `run68k.py --profile` で 180 フ�
 
 - SurugaCC: `surugacc/build.ps1`（`build.cmd` / `build.sh`）。ライブラリのソースはフォルダの下を全部見るので、そのまま使えます。
   ヘッダーを変えたら全部作り直すようにし、移動前のソースの古い `.o`（`src_sys.o` など）は自動で消します。
-- GCC: このフォークでは使いません。`makefile.gen` / `makelib.gen` / `common.mk` / `CMakeLists.txt` / `build_*.bat`、`bin/` の GCC と make の一式、`lib/libmd*.a` / `lib/libgcc.a` は削除しました（下の「GCC で使っていたものの削除」）。
+- GCC: 使いません。`makefile.gen` / `makelib.gen` / `common.mk` / `CMakeLists.txt` / `build_*.bat`、`bin/` の GCC と make の一式、`lib/libmd*.a` / `lib/libgcc.a` は削除しました（下の「GCC で使っていたものの削除」）。
 
 ## GCC で使っていたものの削除
 
@@ -107,29 +107,54 @@ SurugaCC（-O2）で `sample/game/sonic` を `run68k.py --profile` で 180 フ�
 | `CMakeLists.txt` | m68k-elf-gcc でライブラリを作る CMake |
 | `build_lib.bat`, `build_samples.bat`, `build_adv.bat` | 上の makefile を呼ぶだけ |
 | `lib/libmd.a`, `lib/libmd_debug.a`, `lib/libmd_debug.dwarf4-O1.cfg`, `lib/libgcc.a` | GCC で作ったライブラリ。SurugaCC は `surugacc/out/` に自分で作り、libgcc に当たる関数は SurugaCC の実行時ライブラリを使う |
-| `bin/` の `gcc.exe`, `cc1.exe`, `cpp.exe`, `as.exe`, `ld.exe`, `ar.exe`, `nm.exe`, `objcopy.exe`, `objdump.exe`, `size.exe`, `gdb.exe`, `lto1.exe`, `lto-wrapper.exe`, `liblto_plugin.dll`, `libgcc_s_dw2-1.dll`, `libstdc++-6.dll` | GCC のツールチェーン |
+| `bin/` の `gcc.exe`, `cc1.exe`, `cpp.exe`, `as.exe`, `ld.exe`, `ar.exe`, `nm.exe`, `objcopy.exe`, `objdump.exe`, `size.exe`, `gdb.exe`, `lto1.exe`, `lto-wrapper.exe`, `liblto_plugin.dll`, `libstdc++-6.dll` | GCC のツールチェーン |
 | `bin/` の `make.exe`, `sh.exe`, `cp.exe`, `mkdir.exe`, `rm.exe`, `msys-*.dll` | makefile を動かすための MSYS の道具 |
 | `bin/` の `mac68k.exe`, `bintos.exe`, `convsym.exe`, `nm2wch.exe`, `sizebnd.jar` | makefile からだけ呼ぶ道具（`bintos` と `sizebnd` の計算は `build.ps1` が自分で行う。シンボルは SurugaCC の ELF を gdb で読む） |
+| `tools/` の `apj`, `bintos`, `commons`, `convsym`, `lz4w`, `rescomp`（Java 版）, `sizebnd`, `xgm rom builder`, `xgm2tool`（Java 版）, `xgmtool`, `settings.gradle` | bin にある道具や jar の元のソース。使っていない（必要なら本家から取れる） |
 
 `.vscode/tasks.json` は make を呼んでいたので、SurugaCC でライブラリを作るタスクに置き換えました。
 
 残したもの:
 
-- `bin/rescomp.jar`, `xgmtool.exe`, `xgm2tool.jar`, `apj.jar`, `lz4w.jar`, `xgmRomBuilder.jar`, `sjasm.exe`: リソース変換と Z80 のアセンブル（`build.ps1` と rescomp が使う）
+- `bin/rescomp.jar`, `xgmtool.exe`, `xgm2tool.jar`, `apj.jar`, `lz4w.jar`, `sjasm.exe`: リソース変換と Z80 のアセンブル（`build.ps1` と rescomp が使う）
+- `bin/libgcc_s_dw2-1.dll`: `xgmtool.exe`（XGM の変換）が使う MinGW の実行時ライブラリ。GCC を消したときにいっしょに消してしまい、XGM を使うプロジェクトの rescomp が失敗していたので戻した
 - `md.ld`, `src/boot/`, `inc/asm_mac.i`: SurugaCC のリンクとアセンブルでも使う
-- `-DSGDK_GCC` などヘッダーの中の GCC 向けの分岐: SurugaCC も `-DSGDK_GCC` でビルドしている（GCC 互換で動く）
-- `tools/` の道具のソース（`convsym`, `sizebnd`, `bintos` など）: 本家との差を大きくしないため。使わない
+- `tools/rescomp-cs`, `tools/xgm2tool-cs`: `build.ps1` が dotnet でビルドして使う
+- `tools/sjasm`: Linux・macOS では `bin/sjasm.exe` が使えないので、ここからビルドする
 - `tools/rescomp-cs/tests/sprj/run_test.sh`: PC 上でのテストに Ubuntu の `m68k-linux-gnu-gcc` と qemu を使う（リポジトリの中の GCC ではない）
 - サンプルの `.cbp` などのプロジェクトファイル: 本家のサンプルのまま
-- `readme.md`: 本家の説明のまま（GCC の手順が書いてある）
 
-## 本家の更新を取り込むとき
+## 古い痕跡の削除
 
-- このフォークで消したファイル（makefile.gen や bin/ の GCC など）を本家が変えたときは、マージで衝突するので削除のままにしてください（`git rm`）。
-- ファイルごと移したもの（ほとんど）は、git が名前の変更として追いかけるので、`git merge upstream/master` で中身の変更はそのまま入ります。
-  本家で新しく足されたファイルは `src/` の直下に来るので、どの層か決めて移してください。
-- 中身を分けたり書き換えたりしたところには `[V1]` の目印があります（`git grep "\[V1\]"`）。主なものは次のとおりです。
-  本家がこれらを変えたときは衝突するので、表の移した先へ手で反映してください（試しに本家側で `src/z80_ctrl.c` と `src/vdp_spr.c` を変えてマージすると、ファイルごと移した `vdp_spr.c` は自動で入り、2 つに分けた `z80_ctrl.c` は衝突しました）。
+このフォークは本家（Stephane-D/SGDK）から切り離し、本家の更新はもう取り込みません。サンプル（`sample/`）以外で、SurugaCC と SPRX / SPRJ だけの構成で使わない古いものを消しました。
+
+| 消したもの | 理由 |
+|---|---|
+| `.github/`（`FUNDING.yml`, `ISSUE_TEMPLATE/`） | 本家のスポンサーと issue のひな形 |
+| `changelog.txt` | 本家のリリースの履歴（git の履歴に残っている） |
+| `doc/doxyconfig` | 本家の doxygen 設定（本家のサイトに出すためのもの） |
+| `doc/img/` | 本家の `readme.md` に貼っていたゲームの画像 |
+| `executing` | 中身が空のファイル |
+| `lib/surugacc-O2/`, `lib/surugacc-debug-O2/` | 昔のビルドが `lib/` に作った Z80 ドライバの生成物。今は `surugacc/out/` に作る |
+| `bin/xgmRomBuilder.jar`, `bin/xgmRomBuilder.txt` | XGM の音楽 ROM を作る単体の道具。`build.ps1` も rescomp も使わない |
+| `project/template/out/rom.bin` | GCC で作ったテンプレートの ROM |
+| `res/image/logo_old.png`, `sgdk_logo_2.png`〜`sgdk_logo_4.png` | どこからも使っていないロゴ（`libres.res` は `sgdk_logo.png` だけ） |
+| `inc/sprite_eng_legacy.h`, `src/mw/sprite/sprite_eng_legacy.c` | 古いスプライトエンジン。SPRX を組み込んだ標準のエンジンだけにした。`LEGACY_SPRITE_ENGINE` は古いコードのために 0 のまま残す |
+| `inc/ext/sprite_eng_ext.h` | SPRX の以前の名前のヘッダー（`sprx.h` を読むだけ）。どこからも使っていない |
+| `-DSGDK_GCC` | ライブラリにもサンプルにもこれを見ているところがない |
+| `zerasul.genesis-code` のおすすめ（`.vscode/extensions.json`） | GCC と make でビルドする拡張。テンプレートには SurugaCC でビルドする `tasks.json` を足した |
+
+残したもの:
+
+- `license.txt`: SGDK のライセンス（MIT）。ソースの作者の表記も残す
+- `COPYING.RUNTIME`: `bin/libgcc_s_dw2-1.dll` を配るためのライセンス（GCC の実行時ライブラリ例外）
+- `inc/config.h` の `LEGACY_ERROR_HANDLER` と `LEGACY_FONT_LOCATION`: 今も選べる設定（`LEGACY_FONT_LOCATION` は 1 で使っている）
+- ヘッダーの `_Pragma("GCC error ...")`: 使わなくなった API の名前を使ったときにエラーで知らせるための目印。ふだんのビルドには関係しない
+- `setup.bat`, `memo.md`, `SGDK.code-workspace`: このフォークで足したもの
+
+## 本家のファイルとの対応
+
+本家の直した点を手で持ってくるときのために、中身を分けたり書き換えたりしたところには `[V1]` の目印があります（`git grep "\[V1\]"`）。主なものは次のとおりです。
 
 | 本家のファイル | 移した先 |
 |---|---|

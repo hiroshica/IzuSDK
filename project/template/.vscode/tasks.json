@@ -1,0 +1,22 @@
+{
+    // SurugaCC でビルドする (このテンプレートを sample/ などリポジトリの 2 段下に置いたとき。surugacc/README.md を参照)
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "group": { "kind": "build", "isDefault": true },
+            "label": "build (SurugaCC)",
+            "type": "shell",
+            "command": "pwsh",
+            "args": ["-NoProfile", "-File", "${workspaceFolder}/../../surugacc/build.ps1", "${workspaceFolder}"],
+            "problemMatcher": []
+        },
+        {
+            "group": "build",
+            "label": "build debug (SurugaCC)",
+            "type": "shell",
+            "command": "pwsh",
+            "args": ["-NoProfile", "-File", "${workspaceFolder}/../../surugacc/build.ps1", "-g", "${workspaceFolder}"],
+            "problemMatcher": []
+        }
+    ]
+}

@@ -21,7 +21,6 @@
 #include "dma.h"
 #include "sram.h"
 #include "sprite_eng.h"
-#include "sprite_eng_legacy.h"
 #include "task.h"
 
 #include "tools.h"
@@ -609,10 +608,8 @@ static NO_INLINE void internal_reset()
     // important to do it *before* VDP_init
     spritesPool = NULL;
     spriteVramSize = 0;
-#if (LEGACY_SPRITE_ENGINE == 0)
     // [V1] default sprite engine port (built-in engine with SPRX)
     SPR_setEnginePort(NULL);
-#endif
 
     // init part (always do MEM_init() first)
     MEM_init();
