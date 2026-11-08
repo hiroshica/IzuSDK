@@ -1,8 +1,0 @@
-include $(SGDK)/makefile.gen
-
-#-include $(DEPS)
-#
-#	include $(SGDK)/makefile.gen
-
-
-

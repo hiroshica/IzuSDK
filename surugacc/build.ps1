@@ -10,6 +10,7 @@
     - リソースの変換は C# 版の rescomp (tools/rescomp-cs。dotnet があれば surugacc/out/rescomp に自動でビルドする) を使う。
       まだ C# に移していない種類のリソースがあるときや dotnet がないときは bin/rescomp.jar を使う (java が必要)。
       環境変数 ISDK_RESCOMP=java (旧名 SGDK_RESCOMP も可) で、いつも rescomp.jar を使う。
+      ISDK_RESCOMP に rescomp.dll のパスを書くと、自分でビルドせずにそれを使う (Tokaido の setup.bat は toolchain/rescomp/rescomp.dll を設定する)。
     - ROM の大きさとチェックサムの調整 (sizebnd.jar と同じ計算) はこのスクリプトの中で行う。
     - Z80 のドライバ (*.s80) は sjasm でアセンブルする (Windows では bin/sjasm.exe、それ以外では PATH の sjasm)。
 
@@ -130,6 +131,13 @@ function Get-RescompCs {
     if ($script:RescompCsChecked) { return $script:RescompCs }
     $script:RescompCsChecked = $true
     if ($script:UseJavaRescomp) { return $null }
+    # ISDK_RESCOMP に rescomp.dll のパス (Tokaido の toolchain/rescomp など) があれば、それをそのまま使う
+    $given = if ($env:ISDK_RESCOMP) { $env:ISDK_RESCOMP } else { $env:SGDK_RESCOMP }
+    if ($given -and $given -ne 'java') {
+        if (-not (Test-Path -LiteralPath $given -PathType Leaf)) { throw "build.ps1: ISDK_RESCOMP の $given がありません" }
+        $script:RescompCs = (Resolve-Path -LiteralPath $given).Path
+        return $script:RescompCs
+    }
     $src = Join-Path $gdk 'tools/rescomp-cs/src'
     if (-not (Test-Path -LiteralPath (Join-Path $src 'RescompCs.csproj'))) { return $null }
     $outDir = Join-Path $PSScriptRoot 'out/rescomp'
