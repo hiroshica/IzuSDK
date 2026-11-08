@@ -16,6 +16,13 @@
 #ifndef _MATHS3D_H_
 #define _MATHS3D_H_
 
+/**
+ *  \brief
+ *      [V1] Default viewport size (same as BMP_WIDTH x BMP_HEIGHT, checked in bmp.c) so maths3D does not depend on bmp.h
+ */
+#define M3D_DEFAULT_VIEWPORT_WIDTH      256
+#define M3D_DEFAULT_VIEWPORT_HEIGHT     160
+
 
 // 3D base structutes
 

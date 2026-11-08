@@ -314,17 +314,34 @@ foreach ($f in Get-RelativeFiles $gdk src '*.s80') {
     $genAsm["$base.s"] = "$gen/$base.s"
 }
 $LINC = @("-I$gdk/inc", "-I$gdk/src", "-I$gdk/res", "-I$gen")
+# 1 つでもヘッダー (inc/ と src/ の .h / .i) が .o より新しければ、その .o を作り直す
+# (ライブラリのソースは .h を介して互いに依存するので、ソースの日付だけでは古い .o が残る)
+$newestHeader = (@(Get-ChildItem "$gdk/inc", "$gdk/src" -Recurse -File -Include '*.h', '*.i') |
+                 Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1).LastWriteTimeUtc
+function Test-LibStale([string]$Out, [string]$In) {
+    (Test-Stale $Out $In) -or ($newestHeader -and (Get-Item -LiteralPath $Out).LastWriteTimeUtc -lt $newestHeader)
+}
 $jobs = [Collections.Generic.List[object]]::new()
+$libObjNames = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
 foreach ($f in Get-RelativeFiles $gdk src '*.c' 'src/boot/') {
     $o = Join-Path $lib (($f -replace '\.c$', '').Replace('/', '_') + '.o')
-    if (Test-Stale $o "$gdk/$f") { $jobs.Add(@($CFLAGS + $LINC + @('-c', "$gdk/$f", '-o', $o))) }
+    [void]$libObjNames.Add([IO.Path]::GetFileName($o))
+    if (Test-LibStale $o "$gdk/$f") { $jobs.Add(@($CFLAGS + $LINC + @('-c', "$gdk/$f", '-o', $o))) }
 }
 $asmSrc = [ordered]@{}
 foreach ($f in Get-RelativeFiles $gdk src '*.s' 'src/boot/') { $asmSrc[$f] = "$gdk/$f" }
 foreach ($k in $genAsm.Keys) { $asmSrc[$k] = $genAsm[$k] }
 foreach ($f in $asmSrc.Keys) {
     $o = Join-Path $lib (($f -replace '\.[^.]*$', '').Replace('/', '_') + '.o')
-    if (Test-Stale $o $asmSrc[$f]) { $jobs.Add(@($AFLAGS + $LINC + @('-c', $asmSrc[$f], '-o', $o))) }
+    [void]$libObjNames.Add([IO.Path]::GetFileName($o))
+    if (Test-LibStale $o $asmSrc[$f]) { $jobs.Add(@($AFLAGS + $LINC + @('-c', $asmSrc[$f], '-o', $o))) }
+}
+# ソースが移動・削除された .o (例: src/sys.c → src/mw/sys.c で残る src_sys.o) は消す。残すと二重定義でリンクできない
+foreach ($o in @(Get-ChildItem $lib -File -Filter '*.o')) {
+    if (-not $libObjNames.Contains($o.Name)) {
+        Write-Host "古い .o を削除: $($o.Name)"
+        Remove-Item -LiteralPath $o.FullName
+    }
 }
 if ($jobs.Count -gt 0) {
     Write-Host "SGDK のライブラリをコンパイル ($($jobs.Count) 個) → $lib"
