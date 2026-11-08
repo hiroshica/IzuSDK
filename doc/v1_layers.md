@@ -110,6 +110,7 @@ SurugaCC（-O2）で `sample/game/sonic` を `run68k.py --profile` で 180 フ�
 | `bin/` の `gcc.exe`, `cc1.exe`, `cpp.exe`, `as.exe`, `ld.exe`, `ar.exe`, `nm.exe`, `objcopy.exe`, `objdump.exe`, `size.exe`, `gdb.exe`, `lto1.exe`, `lto-wrapper.exe`, `liblto_plugin.dll`, `libgcc_s_dw2-1.dll`, `libstdc++-6.dll` | GCC のツールチェーン |
 | `bin/` の `make.exe`, `sh.exe`, `cp.exe`, `mkdir.exe`, `rm.exe`, `msys-*.dll` | makefile を動かすための MSYS の道具 |
 | `bin/` の `mac68k.exe`, `bintos.exe`, `convsym.exe`, `nm2wch.exe`, `sizebnd.jar` | makefile からだけ呼ぶ道具（`bintos` と `sizebnd` の計算は `build.ps1` が自分で行う。シンボルは SurugaCC の ELF を gdb で読む） |
+| `tools/` の `apj`, `bintos`, `commons`, `convsym`, `lz4w`, `rescomp`（Java 版）, `sizebnd`, `xgm rom builder`, `xgm2tool`（Java 版）, `xgmtool`, `settings.gradle` | bin にある道具や jar の元のソース。使っていない（必要なら本家から取れる） |
 
 `.vscode/tasks.json` は make を呼んでいたので、SurugaCC でライブラリを作るタスクに置き換えました。
 
@@ -118,7 +119,8 @@ SurugaCC（-O2）で `sample/game/sonic` を `run68k.py --profile` で 180 フ�
 - `bin/rescomp.jar`, `xgmtool.exe`, `xgm2tool.jar`, `apj.jar`, `lz4w.jar`, `xgmRomBuilder.jar`, `sjasm.exe`: リソース変換と Z80 のアセンブル（`build.ps1` と rescomp が使う）
 - `md.ld`, `src/boot/`, `inc/asm_mac.i`: SurugaCC のリンクとアセンブルでも使う
 - `-DSGDK_GCC` などヘッダーの中の GCC 向けの分岐: SurugaCC も `-DSGDK_GCC` でビルドしている（GCC 互換で動く）
-- `tools/` の道具のソース（`convsym`, `sizebnd`, `bintos` など）: 本家との差を大きくしないため。使わない
+- `tools/rescomp-cs`, `tools/xgm2tool-cs`: `build.ps1` が dotnet でビルドして使う
+- `tools/sjasm`: Linux・macOS では `bin/sjasm.exe` が使えないので、ここからビルドする
 - `tools/rescomp-cs/tests/sprj/run_test.sh`: PC 上でのテストに Ubuntu の `m68k-linux-gnu-gcc` と qemu を使う（リポジトリの中の GCC ではない）
 - サンプルの `.cbp` などのプロジェクトファイル: 本家のサンプルのまま
 - `readme.md`: 本家の説明のまま（GCC の手順が書いてある）
