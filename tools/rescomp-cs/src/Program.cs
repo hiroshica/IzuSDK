@@ -14,7 +14,7 @@ foreach (var param in args)
     else if (dep && depTarget == null) depTarget = param;
 }
 
-Console.WriteLine("ResComp 4.02 (C#) - IsuSDK Resource Compiler (based on SGDK rescomp, Copyright Stephane Dallongeville)");
+Console.WriteLine("ResComp 4.02 (C#) - IzuSDK Resource Compiler (based on SGDK rescomp, Copyright Stephane Dallongeville)");
 
 if (fileName == null)
 {

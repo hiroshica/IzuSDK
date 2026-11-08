@@ -169,10 +169,10 @@ public sealed class Xgm2Processor : IProcessor
     }
 }
 
-/// <summary>Java 版と同じように、IsuSDK の bin にある xgmtool / xgm2tool.jar を呼ぶ。</summary>
+/// <summary>Java 版と同じように、IzuSDK の bin にある xgmtool / xgm2tool.jar を呼ぶ。</summary>
 static class ExternalTools
 {
-    /// <summary>IsuSDK の bin フォルダ: 環境変数 ISDK_BIN (旧名 SGDK_BIN)、なければ GDK / ISDK / SGDK の下の bin、なければこの dll の場所。</summary>
+    /// <summary>IzuSDK の bin フォルダ: 環境変数 ISDK_BIN (旧名 SGDK_BIN)、なければ GDK / ISDK / SGDK の下の bin、なければこの dll の場所。</summary>
     public static string ToolDir
     {
         get

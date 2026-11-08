@@ -19,7 +19,7 @@ $jar = Join-Path $root 'bin/rescomp.jar'
 & dotnet build (Join-Path $src 'RescompCs.csproj') -c Release -o $outDir --nologo -v q | Out-Null
 if ($LASTEXITCODE -ne 0) { throw 'compare.ps1: C# の rescomp をビルドできませんでした' }
 $dll = Join-Path $outDir 'rescomp.dll'
-# xgmtool / xgm2tool.jar は IsuSDK の bin にある (Java 版は rescomp.jar の隣を見る)
+# xgmtool / xgm2tool.jar は IzuSDK の bin にある (Java 版は rescomp.jar の隣を見る)
 $env:ISDK_BIN = Join-Path $root 'bin'
 # XGM2 は C# 版 xgm2tool と同じ出力になるかも一緒に確かめる (jar 側の rescomp は xgm2tool.jar のまま)
 $x2Out = Join-Path $PSScriptRoot 'bin/compare-xgm2tool'

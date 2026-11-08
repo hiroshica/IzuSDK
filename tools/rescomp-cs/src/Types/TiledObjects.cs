@@ -3,7 +3,7 @@ using System.Xml;
 
 namespace Isdk.Rescomp.Types;
 
-/// <summary>IsuSDK 側のフィールドの型 (Java 版の SFieldDef.SGDKObjectType)。</summary>
+/// <summary>IzuSDK 側のフィールドの型 (Java 版の SFieldDef.SGDKObjectType)。</summary>
 public enum IsdkObjectType { U8, S8, U16, S16, U32, S32, F16, F32, BOOL, STRING, OBJECT }
 
 /// <summary>Tiled 側のプロパティの型 (Java 版の TFieldDef.TiledObjectType)。</summary>
