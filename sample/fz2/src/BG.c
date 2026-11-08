@@ -2,7 +2,7 @@
 
 #include <BG.h>
 
-#define SPR_ON
+// 基地のスプライトは SPRJ (拡張スプライトエンジン SPRX) で表示する。旧 SPR_ON / SPR_MODE1 の手打ち処理は削除
 
 /***************************************************************************/
 //extern BG_Record *RoundTable[];
@@ -44,19 +44,19 @@ static void BG_Exit(BG_Control *this)
         this->NowMapB = NULL;
     }
 
-#ifndef SPR_ON
     for(int iA = 0; iA < BG_AREA_MAX;++iA)
     {
         for(int iB = 0; iB < BG_BASE_MAX; ++iB)
         {
-            if(this->m_BGBase[iA][iB].m_Spr != NULL)
+            Sprite *spr = this->m_BGBase[iA][iB].m_Spr;
+            if(spr != NULL)
             {
-                ReleaseSpriteBuffer(this->m_BGBase[iA][iB].m_Spr);
+                ReleaseSpriteBuffer(spr);
+                SPRX_detach(spr);           // プールに戻すので拡張コマ指定を外す
                 this->m_BGBase[iA][iB].m_Spr = NULL;
             }
         }
     }
-#endif
 }
 /***************************************************************************/
 void BGStartInit(BG_Control *this, s16 stageno)
@@ -93,15 +93,7 @@ void BG_PreUpdate(BG_Control *this)
 {
 }
 /***************************************************************************/
-#define ANIM_INDEX_MAX      (4)
-#define ANIM_FRAME          (24)
-s16 AnimIndexOffset[ANIM_INDEX_MAX] =
-{
-    15 * 0,
-    15 * 1,
-    15 * 2,
-    15 * 1,
-};
+// 旧: AnimIndexOffset / ANIM_FRAME による手動アニメは SPRJ の自動アニメ (JSON の durationMs) に置き換えた
 //------------------------------------------------
 #define BASESPR_W   (8*5)
 static s16 CheckScreenLimit(s32 cx)
@@ -157,15 +149,7 @@ static Vect2D_s32 StageBase_CalcScreen(Stage_Control *this, Vect2D_ff32 *inpos, 
 void BG_DrawUpdate(BG_Control *this, Stage_Control *mother, ff32 xa_addin)
 {
     Area_Record *record = &this->StageRecord->m_Area[this->m_NowArea];
-    s16 tileoffset = 0;
-#if 0    
-    s16 index = this->m_NowFrame / ANIM_FRAME;
-    tileoffset = AnimIndexOffset[index];
-    this->m_NowFrame++;
-    if(this->m_NowFrame >= (ANIM_INDEX_MAX * ANIM_FRAME)){
-        this->m_NowFrame = 0;
-    }
-#endif
+    const SprxInfo *baseinfo = this->StageRecord->m_StageBaseData;
 
     ff32 xb_addin = FF32_mul(xa_addin, SCRXB_DIV);
     this->m_PosA.x += xa_addin;
@@ -189,7 +173,7 @@ void BG_DrawUpdate(BG_Control *this, Stage_Control *mother, ff32 xa_addin)
         Pos.x = brecord->m_X;
         Pos.y = brecord->m_Y;
 
-        if(brecord->m_JobMode >= BG_Mode_Active)
+        if((spr != NULL) && (brecord->m_JobMode >= BG_Mode_Active))
         {
             bool drawf = TRUE;
             Vect2D_s32 scrpos = StageBase_CalcScreen(mother, &Pos, awidth);
@@ -233,8 +217,8 @@ void BG_DrawUpdate(BG_Control *this, Stage_Control *mother, ff32 xa_addin)
                 }
 
 
-                SPR_setVRAMTileIndex(spr, this->VRAM + tileoffset);
-                SPR_setPosition(spr, (s16)scrpos.x, (s16)scrpos.y);
+                // scrpos = 基地の基準点 (JSON のキャンバス中心)。アニメとタイルは SPRX が処理する
+                SPRX_setPosition(spr, baseinfo, (s16)scrpos.x, (s16)scrpos.y);
                 SPR_setVisibility(spr, AUTO_FAST);
             }
             else
@@ -264,27 +248,24 @@ void BGSetupArea(BG_Control *this, s16 areano)
     this->m_PosB.y = FF32_toRoundedInt(FF32_mul(this->m_PosA.y, SCRYB_DIV));
 
     // setupBase Data
-    TileSet *getbase = (TileSet *)this->StageRecord->m_StageBaseData;
-    VDP_loadTileSet(getbase, ind, CPU);
+    // 基地のパーツのタイルを region_BG の先頭に置きっぱなしにして (RESIDENT)、全部の基地で共有する
+    const SprxInfo *baseinfo = this->StageRecord->m_StageBaseData;
+    SPRX_loadResidentAt(baseinfo, ind, CPU);
 
-#ifndef SPR_ON
     for(int iB = 0; iB < record->baseSize; ++iB)
     {
         BGBase *brecord = &this->m_BGBase[this->m_NowArea][iB];
         Sprite *spr = GetSpriteBuffer();
         if(spr != NULL)
         {
-            spr->spr_mode = SPR_MODE1;
             brecord->m_Spr = spr;
-            SPR_setVRAMTileIndex(spr, this->VRAM);
+            SPRX_setDefinition(spr, baseinfo, ind);     // VRAM はさっき載せた場所を指すだけ (転送しない)
             SPR_setPriority(spr, FALSE);
-            SPR_setPalette(spr,PAL1);
-            SPR_setDefinition(spr, &base_spr);
-            SPR_setPosition(spr, 0, 0);
+            SPR_setPalette(spr, PAL1);                  // 色は今までどおりエリアのパレット (PAL1)
+            SPR_setVisibility(spr, HIDDEN);             // 表示は BG_DrawUpdate で決める
         }
     }
-    ind += Stage1_base_tileset.numTile;
-#endif
+    ind += baseinfo->vramTiles;
 
     VDP_loadTileSet(record->tileA, ind, CPU);
     this->NowMapA = MAP_create(record->mapA, BG_A, TILE_ATTR_FULL(PAL1, FALSE, FALSE, FALSE, ind));

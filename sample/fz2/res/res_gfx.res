@@ -44,7 +44,11 @@ MAP bgb_map1_2 "export/BG/1_2_bg.png" bgb_tileset1_2 BEST BEST 0
 //---------------------------------------------------------------------
 // Stage1 Base
 //---------------------------------------------------------------------
-TILESET Stage1_base_tileset "export/OBJECT/Stage1_Base.png" BEST NONE
+// 旧: 手打ちテーブル(SpriteTables.c の base_spr)用のタイル
+//TILESET Stage1_base_tileset "export/OBJECT/Stage1_Base.png" BEST NONE
+// 新: JSON スプライト (SPRJ)。タイルは VRAM に置きっぱなし (基地は全員で共有)
+//   timediv 16.6667 = durationMs(100ms) を 1/60 秒単位に (6 フレーム)。旧コードと同じ 24 フレームにするなら 4.1667
+SPRJ stage1_base "export/STAGE1/animations.json" RESIDENT BEST 16.6667 "export/STAGE1/Stage1Base.png"
 
 //---------------------------------------------------------------------
 // Stage2

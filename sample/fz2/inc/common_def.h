@@ -143,7 +143,7 @@ typedef struct bg_record
 
 typedef struct _Stage_Record
 {
-    const TileSet      *m_StageBaseData;
+    const SprxInfo     *m_StageBaseData;    // 基地のスプライト (SPRJ)  旧: const TileSet *
     s16                m_AreaSize;
     Area_Record        m_Area[];
 } Stage_Record;

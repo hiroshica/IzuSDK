@@ -152,7 +152,7 @@ BGBase Stage0_Base2[] =
 
 Stage_Record Stage1 = 
 {
-    &Stage1_base_tileset,
+    &stage1_base,           // SPRJ (旧: &Stage1_base_tileset)
     3,
     {
         {

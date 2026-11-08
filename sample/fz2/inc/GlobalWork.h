@@ -27,7 +27,7 @@ Sprite *GetSpriteBuffer();
 void ReleaseSpriteBuffer(Sprite *inspr);
 
 // SpriteTables.c
-extern SpriteDefinition base_spr;
+// 基地の手打ちテーブル base_spr は SPRJ (res_gfx.res の stage1_base) に置き換えた
 
 
 
