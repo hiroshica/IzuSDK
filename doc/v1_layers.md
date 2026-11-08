@@ -80,7 +80,7 @@ DMA（SCHED_TASK_DMA）→ スクロール（SCHED_TASK_SCROLL）→ パレッ�
 
 ## 計画書と変えたところ
 
-1. **HAL は static inline ではなくマクロ**: SurugaCC は関数のインライン展開をしません（SurugaCC の `docs/メガドライブ対応.md` の「まだできないこと」）。static inline にすると呼ぶたびに JSR/RTS が入る（計画書の R1、1 回あたり約 56 サイクル）ので、マクロにしました。GCC でも SurugaCC でも呼び出しは増えません。
+1. **HAL は static inline ではなくマクロ**: SurugaCC は関数のインライン展開をしません（SurugaCC の `docs/メガドライブ対応.md` の「まだできないこと」）。static inline にすると呼ぶたびに JSR/RTS が入る（計画書の R1、1 回あたり約 56 サイクル）ので、マクロにしました。どのコンパイラでも呼び出しは増えません。
 2. **自動インクリメントの「同じなら書かない」はやめた**: DMA キューの項目がレジスタ 0x0F を影の表を通さずに書き換えるので、影の値と比べて省くと間違えます。`hal_vdp_set_autoinc()` はいつも書きます。
 3. **C++ は使わない**: v2 は C++20（concept / constinit）が前提ですが、SurugaCC が扱えるのは C++98 のサブセット（テンプレートなし）です。V1 は C のままです。v2 をするなら、計画書の O2（C の接頭辞とマクロの別名）が SurugaCC に合います。
 4. **ASM 化（A1〜A9）はしていない**: 見積もりは手計算で、計画書自身が「先に実測」と書いています。HAL のまとめて送る関数（`hal_vdpbulk_*`）だけ asm で用意しました。
@@ -95,10 +95,37 @@ SurugaCC（-O2）で `sample/game/sonic` を `run68k.py --profile` で 180 フ�
 
 - SurugaCC: `surugacc/build.ps1`（`build.cmd` / `build.sh`）。ライブラリのソースはフォルダの下を全部見るので、そのまま使えます。
   ヘッダーを変えたら全部作り直すようにし、移動前のソースの古い `.o`（`src_sys.o` など）は自動で消します。
-- GCC（`makelib.gen`）: ソースを探す深さを 1 段増やしました。**`lib/libmd.a` は本家が作ったままなので、GCC で使うときは `make -f makelib.gen` でライブラリを作り直してください**（新しい `sega.s` は `vintTaskCB` を使います）。
+- GCC: このフォークでは使いません。`makefile.gen` / `makelib.gen` / `common.mk` / `CMakeLists.txt` / `build_*.bat`、`bin/` の GCC と make の一式、`lib/libmd*.a` / `lib/libgcc.a` は削除しました（下の「GCC で使っていたものの削除」）。
+
+## GCC で使っていたものの削除
+
+ビルドは SurugaCC だけにしたので、GCC のビルドにしか使わないものを消しました。
+
+| 消したもの | 理由 |
+|---|---|
+| `makefile.gen`, `makelib.gen`, `common.mk` | GCC + make でのビルド手順。`surugacc/build.ps1` が同じ手順を持つ |
+| `CMakeLists.txt` | m68k-elf-gcc でライブラリを作る CMake |
+| `build_lib.bat`, `build_samples.bat`, `build_adv.bat` | 上の makefile を呼ぶだけ |
+| `lib/libmd.a`, `lib/libmd_debug.a`, `lib/libmd_debug.dwarf4-O1.cfg`, `lib/libgcc.a` | GCC で作ったライブラリ。SurugaCC は `surugacc/out/` に自分で作り、libgcc に当たる関数は SurugaCC の実行時ライブラリを使う |
+| `bin/` の `gcc.exe`, `cc1.exe`, `cpp.exe`, `as.exe`, `ld.exe`, `ar.exe`, `nm.exe`, `objcopy.exe`, `objdump.exe`, `size.exe`, `gdb.exe`, `lto1.exe`, `lto-wrapper.exe`, `liblto_plugin.dll`, `libgcc_s_dw2-1.dll`, `libstdc++-6.dll` | GCC のツールチェーン |
+| `bin/` の `make.exe`, `sh.exe`, `cp.exe`, `mkdir.exe`, `rm.exe`, `msys-*.dll` | makefile を動かすための MSYS の道具 |
+| `bin/` の `mac68k.exe`, `bintos.exe`, `convsym.exe`, `nm2wch.exe`, `sizebnd.jar` | makefile からだけ呼ぶ道具（`bintos` と `sizebnd` の計算は `build.ps1` が自分で行う。シンボルは SurugaCC の ELF を gdb で読む） |
+
+`.vscode/tasks.json` は make を呼んでいたので、SurugaCC でライブラリを作るタスクに置き換えました。
+
+残したもの:
+
+- `bin/rescomp.jar`, `xgmtool.exe`, `xgm2tool.jar`, `apj.jar`, `lz4w.jar`, `xgmRomBuilder.jar`, `sjasm.exe`: リソース変換と Z80 のアセンブル（`build.ps1` と rescomp が使う）
+- `md.ld`, `src/boot/`, `inc/asm_mac.i`: SurugaCC のリンクとアセンブルでも使う
+- `-DSGDK_GCC` などヘッダーの中の GCC 向けの分岐: SurugaCC も `-DSGDK_GCC` でビルドしている（GCC 互換で動く）
+- `tools/` の道具のソース（`convsym`, `sizebnd`, `bintos` など）: 本家との差を大きくしないため。使わない
+- `tools/rescomp-cs/tests/sprj/run_test.sh`: PC 上でのテストに Ubuntu の `m68k-linux-gnu-gcc` と qemu を使う（リポジトリの中の GCC ではない）
+- サンプルの `.cbp` などのプロジェクトファイル: 本家のサンプルのまま
+- `readme.md`: 本家の説明のまま（GCC の手順が書いてある）
 
 ## 本家の更新を取り込むとき
 
+- このフォークで消したファイル（makefile.gen や bin/ の GCC など）を本家が変えたときは、マージで衝突するので削除のままにしてください（`git rm`）。
 - ファイルごと移したもの（ほとんど）は、git が名前の変更として追いかけるので、`git merge upstream/master` で中身の変更はそのまま入ります。
   本家で新しく足されたファイルは `src/` の直下に来るので、どの層か決めて移してください。
 - 中身を分けたり書き換えたりしたところには `[V1]` の目印があります（`git grep "\[V1\]"`）。主なものは次のとおりです。
