@@ -30,6 +30,9 @@ public static class Compiler
         new WavProcessor(),
         new XgmProcessor(),
         new Xgm2Processor(),
+        // [EXT] SPRX: JSON sprite (extended frames)
+        new SpriteJsonKindsProcessor(),
+        new SpriteJsonProcessor(),
     };
 
     /// <summary>Java 版にあって、まだ C# に移していない種類。</summary>

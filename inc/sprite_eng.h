@@ -78,12 +78,19 @@
  *      hardware sprite. This result in faster visibility computation at the expense of using extra (wasting) hardware sprites.
  */
 #define SPR_FLAG_FAST_AUTO_VISIBILITY           0x0100
+// [EXT] SPRX begin
+/**
+ *  \brief
+ *      Sprite uses extended frames (see ext/sprite_eng_ext.h). Fork-only extension.
+ */
+#define SPR_FLAG_EXT_FRAME                      0x0080
+// [EXT] SPRX end
 
 /**
  *  \brief
  *      Mask for sprite flag
  */
-#define SPR_FLAG_MASK                           (SPR_FLAG_INSERT_HEAD | SPR_FLAG_DISABLE_DELAYED_FRAME_UPDATE | SPR_FLAG_AUTO_VRAM_ALLOC | SPR_FLAG_AUTO_TILE_UPLOAD | SPR_FLAG_AUTO_VISIBILITY | SPR_FLAG_FAST_AUTO_VISIBILITY)
+#define SPR_FLAG_MASK                           (SPR_FLAG_INSERT_HEAD | SPR_FLAG_DISABLE_DELAYED_FRAME_UPDATE | SPR_FLAG_AUTO_VRAM_ALLOC | SPR_FLAG_AUTO_TILE_UPLOAD | SPR_FLAG_AUTO_VISIBILITY | SPR_FLAG_FAST_AUTO_VISIBILITY | SPR_FLAG_EXT_FRAME)   // [EXT] SPRX: + SPR_FLAG_EXT_FRAME
 
 /**
  *  \brief

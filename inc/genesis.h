@@ -83,6 +83,11 @@
 #include "ext/link_cable.h"
 #endif
 
+// [EXT] SPRX
+#if (MODULE_SPRITE_EXT != 0)
+#include "ext/sprite_eng_ext.h"
+#endif
+
 // preserve compatibility with old resources name
 #define logo_lib sgdk_logo
 #define font_lib font_default
