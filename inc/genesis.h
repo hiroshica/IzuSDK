@@ -1,7 +1,7 @@
 #ifndef _GENESIS_H_
 #define _GENESIS_H_
 
-// IsuSDK (ISDK): derived from SGDK by Stephane Dallongeville (https://github.com/Stephane-D/SGDK)
+// IzuSDK (ISDK): derived from SGDK by Stephane Dallongeville (https://github.com/Stephane-D/SGDK)
 #define ISDK_VERSION    1.0
 #define ISDK            TRUE
 

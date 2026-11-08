@@ -25,7 +25,7 @@ dotnet surugacc/out/rescomp/rescomp.dll <input.res> [output.s] [-noasm] [-nohead
 | MAP | 済み（画像と TMX の両方） |
 | OBJECTS | 済み（オブジェクト間の参照の解決も） |
 | WAV | 済み（PCM の WAV。Java Sound の変換・再サンプリングを同じ結果になるように移した。float などの WAV は jar に任せる） |
-| XGM | 済み（Java 版と同じく IsuSDK の bin にある xgmtool を呼ぶ） |
+| XGM | 済み（Java 版と同じく IzuSDK の bin にある xgmtool を呼ぶ） |
 | XGM2 | 済み（`tools/xgm2tool-cs` の C# 版 xgm2tool を呼ぶ。環境変数 `ISDK_XGM2TOOL`（旧名 `SGDK_XGM2TOOL`）にその dll を指すと使い、なければ・対応していない指定のときは `java -jar bin/xgm2tool.jar`） |
 | SPRJ / SPRJ_KINDS | このフォーク独自（JSON スプライト → 拡張スプライトエンジン用のデータ。`doc/sprx.md` を参照） |
 

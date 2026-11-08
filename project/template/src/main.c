@@ -1,4 +1,4 @@
-// base IsuSDK (ISDK) include
+// base IzuSDK (ISDK) include
 #include <genesis.h>
 
 // file header (not really useful here but just for the example)
