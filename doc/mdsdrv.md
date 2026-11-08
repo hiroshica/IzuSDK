@@ -16,7 +16,7 @@ BIN mdsseqdat "snd/mdsseq.bin" 2 2 0 NONE FALSE
 BIN mdspcmdat "snd/mdspcm.bin" 32768 2 0 NONE FALSE
 ```
 
-mdslink が作る `mdsseq.h` には曲の番号が入っています。作り方の例は `sample/fz2/SndBase/build.bat` です。
+mdslink が作る `mdsseq.h` には曲の番号が入っています。作り方の例は Tokaido の `samples/megadrive/fz2/SndBase/build.bat` です。
 
 ドライバ本体はライブラリのものを使うので、mdslink はドライバと同じ版のものを使ってください（版が違うと `MDS_init()` が 0 以外を返します）。
 
