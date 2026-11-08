@@ -10,7 +10,9 @@ mkdir -p "$OUT"
 dotnet build "$SGDK/tools/rescomp-cs/src/RescompCs.csproj" -c Release -o "$OUT/rescomp" >/dev/null
 (cd "$HERE" && dotnet "$OUT/rescomp/rescomp.dll" test.res "$OUT/test.s" > "$OUT/rescomp.log")
 
-m68k-linux-gnu-as --noexecstack -o "$OUT/test_s.o" "$OUT/test.s"
+# same assembler options as SGDK / surugacc ('|' is bitwise or, not a comment)
+cp "$OUT/test.s" "$OUT/test.rs"
+m68k-linux-gnu-gcc -m68000 -x assembler-with-cpp -Wa,--register-prefix-optional,--bitwise-or,--noexecstack -c "$OUT/test.rs" -o "$OUT/test_s.o"
 CFLAGS="-DSGDK_GCC -O1 -Wall -Wno-unused-parameter -fno-builtin -fms-extensions -I$SGDK/inc -I$SGDK/res -I$OUT"
 m68k-linux-gnu-gcc $CFLAGS -c "$SGDK/src/ext/sprite_eng_ext.c" -o "$OUT/sprite_eng_ext.o"
 m68k-linux-gnu-gcc $CFLAGS -c "$HERE/sprx_test.c" -o "$OUT/sprx_test.o"
