@@ -156,45 +156,9 @@ function Get-RescompCs {
     $script:RescompCs = $dll
     return $dll
 }
-# C# 版 xgm2tool (tools/xgm2tool-cs) をビルドして dll の場所を返す。ビルドできなければ $null (rescomp は xgm2tool.jar を使う)
-$script:Xgm2toolCsChecked = $false
-$script:Xgm2toolCs = $null
-function Get-Xgm2toolCs {
-    if ($script:Xgm2toolCsChecked) { return $script:Xgm2toolCs }
-    $script:Xgm2toolCsChecked = $true
-    if ($script:UseJavaRescomp) { return $null }
-    $src = Join-Path $gdk 'tools/xgm2tool-cs/src'
-    if (-not (Test-Path -LiteralPath (Join-Path $src 'Xgm2Tool.csproj'))) { return $null }
-    $outDir = Join-Path $PSScriptRoot 'out/xgm2tool'
-    $dll = Join-Path $outDir 'xgm2tool.dll'
-    $stale = -not (Test-Path -LiteralPath $dll)
-    if (-not $stale) {
-        $built = (Get-Item -LiteralPath $dll).LastWriteTimeUtc
-        $stale = [bool](Get-ChildItem -LiteralPath $src -Recurse -File -Include '*.cs', '*.csproj' |
-            Where-Object { $_.FullName -notmatch '[\\/](obj|bin)[\\/]' -and $_.LastWriteTimeUtc -gt $built })
-    }
-    if ($stale) {
-        if (-not (Get-Command dotnet -CommandType Application -ErrorAction SilentlyContinue)) { return $null }
-        Write-Host 'xgm2tool (C#) をビルド'
-        $log = & dotnet build (Join-Path $src 'Xgm2Tool.csproj') -c Release -o $outDir --nologo -v q 2>&1
-        if ($LASTEXITCODE -ne 0) {
-            $log | ForEach-Object { Write-Host "$_" }
-            Write-Warning 'xgm2tool (C#) をビルドできなかったので、xgm2tool.jar を使います'
-            return $null
-        }
-    }
-    $script:Xgm2toolCs = $dll
-    return $dll
-}
 function Invoke-Rescomp {
     $dll = Get-RescompCs
     if ($dll) {
-        # xgmtool / xgm2tool.jar は IzuSDK の bin にある (Java 版は rescomp.jar の隣を見る)
-        $env:ISDK_BIN = "$gdk/bin"
-        # XGM2 は C# 版 xgm2tool を使う (対応していない指定のときは rescomp が xgm2tool.jar に切り替える)
-        $x2 = Get-Xgm2toolCs
-        Remove-Item Env:SGDK_XGM2TOOL -ErrorAction SilentlyContinue
-        if ($x2) { $env:ISDK_XGM2TOOL = $x2 } else { Remove-Item Env:ISDK_XGM2TOOL -ErrorAction SilentlyContinue }
         & dotnet $dll @args
         if ($LASTEXITCODE -eq 0) { return }
         if ($LASTEXITCODE -ne 3) { throw "build.ps1: rescomp (C#) $($args -join ' ') が失敗しました (終了コード $LASTEXITCODE)" }

@@ -52,8 +52,6 @@ void playerInit() {
 	playerBody.acceleration = FIX16(.25);
 	playerBody.deceleration = FIX16(.2);
 
-	//Setup the jump SFX with an index between 64 and 255
-	XGM_setPCM(64, jump, sizeof(jump));
 }
 
 void playerInputChanged() {
@@ -132,8 +130,6 @@ void updatePlayer() {
 	//Check if player wants to jump by looking the coyote time and jump buffer
 	if (currentCoyoteTime > 0 && currentJumpBufferTime > 0) {
 		playerBody.jumping = TRUE;
-		//Play the SFX with the index 64 (jump sfx) with the highest priority
-		XGM_startPlayPCM(64, 15, SOUND_PCM_CH1);
 		playerBody.velocity.fixY = FIX16(-playerBody.jumpSpeed);
 
 		currentCoyoteTime = 0;

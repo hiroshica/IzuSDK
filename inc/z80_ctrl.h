@@ -140,21 +140,10 @@
 #define Z80_DRIVER_PCM4                 3
 /**
  *  \brief
- *      eXtended VGM music player driver.<br>
- *      This driver takes VGM (or XGM) file as input to play music.<br>
- *      It supports 4 PCM channels at a fixed 14 Khz and allows to play SFX through PCM with 16 level of priority.<br>
- *      The driver is designed to avoid DMA contention when possible (depending CPU load).
+ *      MDSDRV music / SFX driver (see snd/mdsdrv.h, loaded by MDS_init()).<br>
+ *      It plays FM / PSG / PCM sequences made with mdslink (MML or MDS files).
  */
-#define Z80_DRIVER_XGM                  4
-/**
- *  \brief
- *      eXtended VGM music player driver version 2.<br>
- *      This driver takes VGM (or XGM2) file as input to play music.<br>
- *      It supports 3 PCM channels at either 13.3 Khz or 6.65 Khz and envelop control for both FM and PSG.<br>
- *      It allows to play SFX through PCM with 16 level of priority.<br>
- *      The driver supports renforced protection against DMA contention.
- */
-#define Z80_DRIVER_XGM2                 5
+#define Z80_DRIVER_MDSDRV               4
 /**
  *  \brief
  *      CUSTOM Z80 driver.
@@ -288,8 +277,7 @@ void Z80_download(const u16 from, u8 *dest, const u16 size);
  *  - #Z80_DRIVER_PCM<br>
  *  - #Z80_DRIVER_DPCM2<br>
  *  - #Z80_DRIVER_PCM4<br>
- *  - #Z80_DRIVER_XGM<br>
- *  - #Z80_DRIVER_XGM2<br>
+ *  - #Z80_DRIVER_MDSDRV<br>
  *  - #Z80_DRIVER_CUSTOM<br>
  */
 s16  Z80_getLoadedDriver(void);
@@ -300,9 +288,9 @@ s16  Z80_getLoadedDriver(void);
 void Z80_unloadDriver(void);
 
 /**
- *  \deprecated Use the dedicated loadDriver(..) method (as XGM_loadDriver(..) for instance)
+ *  \deprecated Use the dedicated loadDriver(..) method (as SND_PCM_loadDriver(..) for instance)
  */
-#define Z80_loadDriver(driver, waitReady)   _Pragma("GCC error \"This method is deprecated, directly use the dedicated driver 'loadDriver' method (as XGM_loadDriver(..) for instance).\"")
+#define Z80_loadDriver(driver, waitReady)   _Pragma("GCC error \"This method is deprecated, directly use the dedicated driver 'loadDriver' method (as SND_PCM_loadDriver(..) for instance).\"")
 
 /**
  *  \brief
@@ -368,7 +356,7 @@ void Z80_useBusProtection(u16 signalAddress);
  *      This way the sound driver will *try* to avoid accessing the 68K BUS during DMA to
  *      avoid execution interruption and so preserve PCM playback quality.<br>
  *      Note that depending the sound driver, the success of the operation is not 100% garantee and can fails in some conditions
- *      (heavy Z80 load, lot of PSG data in XGM music).<br>
+ *      (heavy Z80 load).<br>
  *      In that case you can also try to use the #Z80_setForceDelayDMA() method to help improving the PCM playblack.
  *
  *  \see Z80_useBusProtection(..)
@@ -406,7 +394,7 @@ bool Z80_getForceDelayDMA(void);
  *  \brief
  *      This method can be used to improve the PCM playback during music play and while DMA queue is used.<br>
  *      Even using the BUS protection with #Z80_setBusProtection you may still experience altered PCM playback.
- *      With the XGM driver for instance this happens when music contains PSG data (Z80 requires the main BUS to access PSG).<br>
+ *      This happens when the Z80 driver needs the main BUS (to access PSG for instance).<br>
  *      By delaying a bit the DMA execution from the DMA queue we let the Z80 to access main bus for a bit of time thus avoiding any stall.
  *      The delay is about 3 scanlines so using the force delay DMA will reduce the DMA bandwidth for about 3 vblank lines.
  *

@@ -71,7 +71,7 @@ DMA（SCHED_TASK_DMA）→ スクロール（SCHED_TASK_SCROLL）→ パレッ�
 | 4 | tools.c が vdp.h / mapper.h / timer.h を読む | vdp.h / timer.h をやめた。`getFPS()` / `getFPS_f()` は sys.c へ。mapper.h（`FAR_SAFE`、HAL）は残した |
 | 5 | maths3D.c が bmp.h を読む | 既定の画面の大きさを `maths3D.h` の定数にし、`bmp.c` で BMP の大きさと同じか確かめる |
 | 6 | z80_ctrl.c がサウンドドライバに依存 | バス・RAM は HAL（`src/hal/z80_ctrl.c`）、ドライバの読み込みとバス保護は MW（`src/mw/snd/z80_driver.c`）に分けた |
-| 7 | vdp_tile.c / xgm.c がライブラリのリソースを直接読む | 未対応（次の段階） |
+| 7 | vdp_tile.c / mdsdrv.c がライブラリのリソースを直接読む（xgm.c は消した） | 未対応（次の段階） |
 | 8 | dma.c が Z80 / タイマーに依存 | DMA の VBlank 処理（Z80 のバス保護つき）は MW の `DMA_doVBlankProcess()` にまとめた。レジスタ操作は HAL（`hal_dma.h`）。キューの Z80 依存は残っている |
 | 9 | joy.c がポートを直接読む | ポートは `hal_io.h` のマクロ経由に |
 | 10 | sega.s / sys.c が BMP / MAP / VDP スクロールを直接呼ぶ | `sega.s` は `vintTaskCB` を呼ぶだけ。`sys.c` の直接参照もなくした |
@@ -116,10 +116,9 @@ SurugaCC（-O2）で `sample/game/sonic` を `run68k.py --profile` で 180 フ�
 
 残したもの:
 
-- `bin/rescomp.jar`, `xgmtool.exe`, `xgm2tool.jar`, `apj.jar`, `lz4w.jar`, `sjasm.exe`: リソース変換と Z80 のアセンブル（`build.ps1` と rescomp が使う）
-- `bin/libgcc_s_dw2-1.dll`: `xgmtool.exe`（XGM の変換）が使う MinGW の実行時ライブラリ。GCC を消したときにいっしょに消してしまい、XGM を使うプロジェクトの rescomp が失敗していたので戻した
+- `bin/rescomp.jar`, `apj.jar`, `lz4w.jar`, `sjasm.exe`: リソース変換と Z80 のアセンブル（`build.ps1` と rescomp が使う）
 - `md.ld`, `src/boot/`, `inc/asm_mac.i`: SurugaCC のリンクとアセンブルでも使う
-- `tools/rescomp-cs`, `tools/xgm2tool-cs`: `build.ps1` が dotnet でビルドして使う
+- `tools/rescomp-cs`: `build.ps1` が dotnet でビルドして使う
 - `tools/sjasm`: Linux・macOS では `bin/sjasm.exe` が使えないので、ここからビルドする
 - `tools/rescomp-cs/tests/sprj/run_test.sh`: PC 上でのテストに Ubuntu の `m68k-linux-gnu-gcc` と qemu を使う（リポジトリの中の GCC ではない）
 - サンプルの `.cbp` などのプロジェクトファイル: 本家のサンプルのまま
@@ -147,7 +146,6 @@ SurugaCC（-O2）で `sample/game/sonic` を `run68k.py --profile` で 180 フ�
 残したもの:
 
 - `license.txt`: SGDK のライセンス（MIT）。ソースの作者の表記も残す
-- `COPYING.RUNTIME`: `bin/libgcc_s_dw2-1.dll` を配るためのライセンス（GCC の実行時ライブラリ例外）
 - `inc/config.h` の `LEGACY_ERROR_HANDLER` と `LEGACY_FONT_LOCATION`: 今も選べる設定（`LEGACY_FONT_LOCATION` は 1 で使っている）
 - ヘッダーの `_Pragma("GCC error ...")`: 使わなくなった API の名前を使ったときにエラーで知らせるための目印。ふだんのビルドには関係しない
 - `setup.bat`, `memo.md`, `IzuSDK.code-workspace`（以前の `SGDK.code-workspace`）: このフォークで足したもの
@@ -172,3 +170,17 @@ SurugaCC（-O2）で `sample/game/sonic` を `run68k.py --profile` で 180 フ�
 1. 実測: `run68k.py --profile`（SurugaCC の tools）で関数ごとのサイクルが取れます。計画書の「現状cycles」を実測に置き換えてから ASM 化の順番を決める。
 2. ASM 化の候補（計画書の A1 DMA キュー登録、A2 `SPR_updateDefault` の SAT 作成、A6 パレットのフェード）。
 3. 残りの層違反（#7 ライブラリのリソース、#8 DMA キューと Z80）。
+
+## XGM から MDSDRV へ
+
+音のドライバは MDSDRV だけにしました。使い方は `doc/mdsdrv.md` を見てください。
+
+| 消したもの | 理由 |
+|---|---|
+| `src/mw/snd/xgm.c`, `xgm2.c`, `xgm2/`, `drv_xgm.s80`, `inc/snd/xgm.h`, `xgm2.h`, `res/sound/stop_xgm.bin` | XGM / XGM2 のドライバ。MDSDRV に置き換えた |
+| `tools/xgm2tool-cs`, `bin/xgm2tool.jar`, `bin/xgmtool.exe`, `bin/xgm.txt`, `bin/xgm2.txt` | XGM の曲の変換。rescomp-cs の `XGM` / `XGM2` と `WAV ... XGM / XGM2` もやめた |
+| `bin/libgcc_s_dw2-1.dll`, `COPYING.RUNTIME` | `xgmtool.exe` だけが使っていた実行時ライブラリとそのライセンス |
+| `sample/snd/sound-test`, `sample/snd/xgm-player` | XGM のためだけのサンプル |
+| pools / platformer / sonic / pacman / テンプレートの音 | XGM の曲と効果音を外した（絵と動きはそのまま） |
+
+PCM / DPCM2 / PCM4 / NULL の Z80 ドライバ（`src/mw/snd/pcm/` など）は残しています。

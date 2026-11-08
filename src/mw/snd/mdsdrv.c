@@ -1,5 +1,7 @@
 //======================================================================
-// MDSDRV API wrapper for SGDK
+// MDSDRV API wrapper for IzuSDK
+// (altered from the SGDK wrapper: moved into the library, the driver blob is
+//  linked from res/libres.res and MDS_update() runs from the Z80 V-Int hook)
 //======================================================================
 // Copyright (c) 2020 Ian Karlsson
 //
@@ -21,8 +23,21 @@
 //    distribution.
 //======================================================================
 
-#include <genesis.h>
-#include "mdsdrv.h"
+// [V1] L1 MW: MDSDRV sound driver (sgd::mw::sound)
+
+#include "config.h"
+#include "types.h"
+
+#include "z80_ctrl.h"
+#include "snd/sound.h"
+#include "snd/mdsdrv.h"
+
+// auto-generated (mdsdrvdat: MDSDRV driver blob, referenced from the inline asm below)
+#include "res/libres.h"
+
+
+// we don't want to share them
+extern s16 currentDriver;
 
 //! Sound driver work area.
 u16 MDS_work [MDS_WORK_SIZE];
@@ -38,6 +53,11 @@ u16 MDS_work [MDS_WORK_SIZE];
  */
 u16 MDS_init(const u8* seqdata, const u8* pcmdata)
 {
+	// stop the previous Z80 driver tasks (MDSDRV uploads its own Z80 code)
+	Z80_setVIntCallback(NULL);
+	Z80_useBusProtection(0);
+	Z80_setForceDelayDMA(FALSE);
+
 	register u16* a0 asm ("a0") = MDS_work;
 	register const u8* a1 asm ("a1") = seqdata;
 	register const u8* a2 asm ("a2") = pcmdata;
@@ -47,6 +67,12 @@ u16 MDS_init(const u8* seqdata, const u8* pcmdata)
 		: "+a" (a0), "+a" (a1), "=r" (d0)
 		: "a" (a2)
 		: "d1", "cc");
+
+	// any other driver load (SND_NULL_loadDriver()..) must reload its code
+	currentDriver = Z80_DRIVER_MDSDRV;
+	// run MDSDRV every V-Int
+	if (d0 == 0) Z80_setVIntCallback(MDS_update);
+
 	return d0;
 }
 
@@ -116,9 +142,10 @@ u32 MDS_command2(u16 id, u16 param1, u16 param2)
 
 //! MDSDRV update function
 /*!
- *  This must be called every vblank.
+ *  This must be called every vblank. MDS_init() registers it as the
+ *  Z80 V-Int callback, so it is called automatically.
  */
-void MDS_update()
+void MDS_update(void)
 {
 #ifndef DEBUG
 	register u16* a0 asm ("a0") = MDS_work;
@@ -137,7 +164,7 @@ void MDS_update()
  *  Returns a pointer to a zero-terminated string containing the
  *  sound driver version and date.
  */
-char* MDS_get_version_str()
+char* MDS_get_version_str(void)
 {
 	register u16* a0 asm ("a0") = MDS_work;
 	register u32 d0 asm ("d0") = MDS_CMD_GET_VERSION;

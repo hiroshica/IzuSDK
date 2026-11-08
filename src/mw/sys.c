@@ -17,7 +17,6 @@
 #include "timer.h"
 #include "string.h"
 #include "snd/sound.h"
-#include "snd/xgm.h"
 #include "dma.h"
 #include "sram.h"
 #include "sprite_eng.h"

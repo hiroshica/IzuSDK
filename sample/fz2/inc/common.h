@@ -16,7 +16,8 @@
 #endif  /* __GLOBALWORK__ */
 
 /*----------------------------------------------*/
-#include <mdsdrv.h>
+#include "mdsdat.h"
+#include "mdsseq.h"
 
 /*----------------------------------------------*/
 #include <JoyRecord.h>
