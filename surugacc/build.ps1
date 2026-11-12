@@ -120,6 +120,9 @@ if (-not (Test-Path "$gdk/bin/rescomp.jar")) {
 # 本家 SGDK の makefile.gen / makelib.gen と同じオプション (警告などのオプションは surugacc では意味がないので省く)
 $CFLAGS = @('--target', 'megadrive', '-m68000', "-O$Opt", '-fno-builtin', '-fms-extensions', '-ffunction-sections', '-fdata-sections') + $debug
 if ($g) { $CFLAGS += '-DDEBUG=1' }
+# 環境変数で C / C++ の追加オプションを渡せる (SsLibrary の ssbuild.ps1 が -DSSL_ARCH_MD=1 を渡す)
+if ($env:ISDK_EXTRA_CFLAGS) { $CFLAGS += @(Split-Words $env:ISDK_EXTRA_CFLAGS) }
+$CXXFLAGS_EXTRA = @(if ($env:ISDK_CXXFLAGS) { Split-Words $env:ISDK_CXXFLAGS })
 $AFLAGS = @('--target', 'megadrive', '-m68000', '-x', 'assembler-with-cpp', '-Wa,--register-prefix-optional,--bitwise-or') + $debug
 
 # ---- rescomp: C# 版 (tools/rescomp-cs) を使い、まだ C# に移していない種類があれば rescomp.jar で作り直す
@@ -335,7 +338,7 @@ if ($LibOnly) {
 
 # ---- プロジェクト
 $projSources = @(Get-ChildItem -LiteralPath $proj -File -Filter '*.c') +
-               @(if (Test-Path -LiteralPath (Join-Path $proj 'src')) { Get-ChildItem -LiteralPath (Join-Path $proj 'src') -Recurse -File -Filter '*.c' })
+               @(if (Test-Path -LiteralPath (Join-Path $proj 'src')) { Get-ChildItem -LiteralPath (Join-Path $proj 'src') -Recurse -File -Include '*.c', '*.cpp' })
 if ($projSources.Count -eq 0) {
     Write-Host "IzuSDK のライブラリを作りました: $lib"
     Write-Host "$proj には C のソース (*.c か src/*.c) がないので、プロジェクトはビルドしません。"
@@ -383,6 +386,13 @@ try {
         $o = 'out/' + ($f -replace '\.c$', '.o')
         New-Item -ItemType Directory -Force (Split-Path $o) | Out-Null
         if ($rebuild -or (Test-Stale $o $f)) { Write-Host "cc $f"; cc cc @CFLAGS @INC -c $f -o $o }
+        $objs += $o
+    }
+    # C++ (src/**/*.cpp)。オブジェクト名は foo.cpp.o (foo.c と衝突しない)。SurugaCC は拡張子で C++ と判断する
+    foreach ($f in @(Get-RelativeFiles $proj src '*.cpp' 'src/boot/') | Sort-Ordinal) {
+        $o = 'out/' + ($f -replace '\.cpp$', '.cpp.o')
+        New-Item -ItemType Directory -Force (Split-Path $o) | Out-Null
+        if ($rebuild -or (Test-Stale $o $f)) { Write-Host "cc $f"; cc cc @CFLAGS @CXXFLAGS_EXTRA @INC -c $f -o $o }
         $objs += $o
     }
     $top = @(Get-ChildItem . -File -Filter '*.s' | ForEach-Object Name)
