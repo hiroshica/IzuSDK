@@ -112,7 +112,15 @@ if ($gdkEnv -and (Test-Path -LiteralPath $gdkEnv) -and (Resolve-Path -LiteralPat
 }
 $proj = (Resolve-Path $Project).Path
 $debug = @(if ($g) { '-g' })
-$lib = if ($IsdkLib) { $IsdkLib } else { Join-Path $PSScriptRoot "out/lib$(if ($g) { '-debug' })$(if ($Opt -gt 0) { "-O$Opt" })" }
+# ISDK_LIB_INCLUDE (; 区切りの src/ からの相対パスの先頭) を指定すると、ライブラリはそれに合うソースだけをコンパイルする
+# (SsLibrary の lean ビルド: sys.c / vdp.c などを使わない)。.o の置き場は別 (out/lib-lean...) にして、通常のビルドと混ざらないようにする
+$libInclude = @(if ($env:ISDK_LIB_INCLUDE) { $env:ISDK_LIB_INCLUDE -split ';' | Where-Object { $_ } })
+function Test-LibSelected([string]$f) {
+    if ($libInclude.Count -eq 0) { return $true }
+    foreach ($p in $libInclude) { if ($f.StartsWith($p)) { return $true } }
+    return $false
+}
+$lib = if ($IsdkLib) { $IsdkLib } else { Join-Path $PSScriptRoot "out/lib$(if ($libInclude.Count -gt 0) { '-lean' })$(if ($g) { '-debug' })$(if ($Opt -gt 0) { "-O$Opt" })" }
 if (-not (Test-Path "$gdk/bin/rescomp.jar")) {
     throw "build.ps1: $gdk/bin/rescomp.jar がありません (IzuSDK のフォルダを確かめてください)"
 }
@@ -303,13 +311,13 @@ function Test-LibStale([string]$Out, [string]$In) {
 }
 $jobs = [Collections.Generic.List[object]]::new()
 $libObjNames = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
-foreach ($f in Get-RelativeFiles $gdk src '*.c' 'src/boot/') {
+foreach ($f in Get-RelativeFiles $gdk src '*.c' 'src/boot/' | Where-Object { Test-LibSelected $_ }) {
     $o = Join-Path $lib (($f -replace '\.c$', '').Replace('/', '_') + '.o')
     [void]$libObjNames.Add([IO.Path]::GetFileName($o))
     if (Test-LibStale $o "$gdk/$f") { $jobs.Add(@($CFLAGS + $LINC + @('-c', "$gdk/$f", '-o', $o))) }
 }
 $asmSrc = [ordered]@{}
-foreach ($f in Get-RelativeFiles $gdk src '*.s' 'src/boot/') { $asmSrc[$f] = "$gdk/$f" }
+foreach ($f in Get-RelativeFiles $gdk src '*.s' 'src/boot/' | Where-Object { Test-LibSelected $_ }) { $asmSrc[$f] = "$gdk/$f" }
 foreach ($k in $genAsm.Keys) { $asmSrc[$k] = $genAsm[$k] }
 foreach ($f in $asmSrc.Keys) {
     $o = Join-Path $lib (($f -replace '\.[^.]*$', '').Replace('/', '_') + '.o')
