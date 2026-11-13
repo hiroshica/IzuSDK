@@ -1,3 +1,0 @@
-// SPRJ box kinds: declared order = enum value
-hit
-attack

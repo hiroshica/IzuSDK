@@ -141,7 +141,9 @@ function Get-RescompCs {
         $script:RescompCs = (Resolve-Path -LiteralPath $given).Path
         return $script:RescompCs
     }
-    $src = Join-Path $gdk 'tools/rescomp-cs/src'
+    # rescomp-cs は Tokaido\tools\rescomp-cs に移した (IzuSDK の隣)。IzuSDK の中に残っていればそちらも見る
+    $src = Join-Path (Split-Path -Parent $gdk) 'tools/rescomp-cs/src'
+    if (-not (Test-Path -LiteralPath (Join-Path $src 'RescompCs.csproj'))) { $src = Join-Path $gdk 'tools/rescomp-cs/src' }
     if (-not (Test-Path -LiteralPath (Join-Path $src 'RescompCs.csproj'))) { return $null }
     $outDir = Join-Path $PSScriptRoot 'out/rescomp'
     $dll = Join-Path $outDir 'rescomp.dll'

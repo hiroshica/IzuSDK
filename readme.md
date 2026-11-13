@@ -15,7 +15,7 @@ IzuSDK としての版数は `ISDK_VERSION`、目印のマクロは `ISDK` で�
 - ビルドは SurugaCC だけ（GCC・make・Code::Blocks・CMake は使わない）: [surugacc/README.md](surugacc/README.md)
 - ライブラリのソースを HAL / ミドルウェア / Util の層に分けた（V1）: [doc/v1_layers.md](doc/v1_layers.md)
 - スプライトは SPRX（拡張コマ）と JSON のスプライトリソース SPRJ が標準: [doc/sprx.md](doc/sprx.md)
-- リソース変換（rescomp）の C# 版: `tools/rescomp-cs`
+- リソース変換（rescomp）の C# 版: Tokaido の `tools/rescomp-cs` に移した (IzuSDK の隣。`surugacc/build.ps1` はそこを見る)
 - 音のドライバは MDSDRV だけ（XGM / XGM2 は外した）: [doc/mdsdrv.md](doc/mdsdrv.md)
 
 ## 使い方
